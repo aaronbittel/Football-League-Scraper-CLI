@@ -11,7 +11,8 @@ authors = [
 dependencies = [
   "argparse",
   "requests",
-  "beautifulsoup4"
+  "beautifulsoup4",
+  "colorama"
 ]
 
 

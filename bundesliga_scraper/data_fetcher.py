@@ -6,10 +6,13 @@ from dataclasses import dataclass
 
 import requests
 from bs4 import BeautifulSoup
+from colorama import Fore, Style
 
 
 @dataclass
-class TableEntry:
+class TeamTableEntry:
+    """Team entry that represents a row in a football table"""
+
     team: str
     points: int
     games: int
@@ -19,6 +22,22 @@ class TableEntry:
     goals: tuple[int, int]
     diff: int
 
+    def style_entry(self) -> str:
+        """Returns a styled entry of its values"""
+        return style_table_entry(self)
+
+
+def style_table_entry(entry: TeamTableEntry) -> str:
+    """Styles the given TeamTableEntry"""
+
+    repr_str = f"{entry.team:<30}{entry.games:^5}{entry.wins:^3}{entry.ties:^3}"
+    repr_str += f"{entry.defeats:^3}{entry.goals[0]:>4}:{entry.goals[1]:<4}"
+    repr_str += f"{Fore.GREEN if entry.diff >= 0 else Fore.RED}"
+    repr_str += f"{entry.diff:+}".center(5)
+    repr_str += f"{Style.RESET_ALL}{Style.BRIGHT}{entry.points:^5}{Style.RESET_ALL}"
+
+    return repr_str
+
 
 LEAGUE_TABELS_BASE_URLS = {
     "bundesliga": "https://www.kicker.de/bundesliga/tabelle/2023-24/",
@@ -26,7 +45,7 @@ LEAGUE_TABELS_BASE_URLS = {
 }
 
 
-def get_table_information(league: str, gameday: int):
+def get_table_information(league: str, gameday: int, disable_debug: bool = False):
     """Handles getting the table data for the league and specified gameday
 
     Args:
@@ -34,14 +53,18 @@ def get_table_information(league: str, gameday: int):
         gameday (int): gameday for table
     """
     soup = None
-    # soup = fetch_html(f"{LEAGUE_TABELS_BASE_URLS[league.lower()]}{gameday}")
-    with open("bundesliga_table.txt", "r", encoding="utf-8") as f:
-        soup = BeautifulSoup(f.read(), "html.parser")
+    if disable_debug:
+        print("Fetching data from web ...")
+        soup = fetch_html(f"{LEAGUE_TABELS_BASE_URLS[league.lower()]}{gameday}")
+    else:
+        print("Using local file to read data")
+        with open("bundesliga_table.txt", "r", encoding="utf-8") as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
 
     return extract_table_information(soup)
 
 
-def extract_table_information(soup: BeautifulSoup) -> list[TableEntry]:
+def extract_table_information(soup: BeautifulSoup) -> list[TeamTableEntry]:
     """Extracts the table data from the soup object and returns it as a list of
     TableEntries
 
@@ -61,19 +84,21 @@ def extract_table_information(soup: BeautifulSoup) -> list[TableEntry]:
     for tr in trs[1:]:  # first table row is column information
         team = tr.find("img")["alt"]
         _, wins_ties_defeats, _, _, goals, _, *_ = [
-            td.text for td in tr.find_all("td", class_="kick__table--ranking__number")
+            td for td in tr.find_all("td", class_="kick__table--ranking__number")
         ]
 
         wins, ties, defeats = list(
             map(
                 int,
-                wins_ties_defeats.replace("\n", "").strip().split(" ")[0].split("-"),
+                wins_ties_defeats.find(
+                    "span", class_="kick__table--show-mobile"
+                ).text.split("-"),
             )
         )
 
-        goals = tuple(map(int, goals.replace("\n", "").strip().split(":")))
+        goals = tuple(map(int, goals.text.replace("\n", "").strip().split(":")))
 
-        table_entry = TableEntry(
+        table_entry = TeamTableEntry(
             team=team,
             points=wins * 3 + ties,
             games=wins + ties + defeats,

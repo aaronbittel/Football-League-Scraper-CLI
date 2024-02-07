@@ -3,6 +3,8 @@
 import argparse
 import sys
 
+from colorama import Back, Fore, Style
+
 from bundesliga_scraper import data_fetcher
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
@@ -52,6 +54,14 @@ def create_parser() -> argparse.ArgumentParser:
         dest="session",
         action="store_true",
         help="Starts a session for the given league -> league is now default",
+    )
+
+    parser.add_argument(
+        "-dd",
+        "--disable-debug",
+        action="store_true",
+        help="Fetches data from the web when flag is used",
+        dest="disable_debug"
     )
 
     return parser
@@ -106,37 +116,47 @@ def handle_args(args: dict[str, str | int]) -> None:
     Args:
         args (dict[str, str  |  int]): dict of key value pairs given by the user
     """
+
     if args["table"]:
         handle_table_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["table"],  # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args["disable_debug"] # pyright: ignore[reportGeneralTypeIssues]
         )
 
     if args["fixture"]:
         handle_fixture_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["fixture"],  # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args["disable_debug"] # pyright: ignore[reportGeneralTypeIssues]
         )
 
 
-def handle_table_request(league: str, gameday: int) -> None:
+def handle_table_request(league: str, gameday: int, disable_debug: bool = False) -> None:
     """Handling the table request
 
     Args:
         league (str): supplied league
         gameday (int): gameday for the table
+        disable_debug (bool): when set to True fetches data from web
     """
     table_entries_list = data_fetcher.get_table_information(
-        league=league, gameday=gameday
+        league=league, gameday=gameday, disable_debug=disable_debug
     )
 
+    print(f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{"Matches":>37}{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}{Style.RESET_ALL}")
 
-def handle_fixture_request(league: str, gameday: int) -> None:
+    for placement, entry in enumerate(table_entries_list, start=1):
+        print(f"{placement:<4}{entry.style_entry()}")
+
+
+def handle_fixture_request(league: str, gameday: int, disable_debug: bool = False) -> None:
     """Handling fixture request
 
     Args:
         league (str): supplied league
         gameday (int): gameday for the fixture
+        disable_debug (bool): when set to True fetches data from web
     """
 
-    print(f"fetching {league} fixture data for the gameday {gameday}")
+    print(f"fetching {league} fixture data (from web {disable_debug}) for the gameday {gameday}")
