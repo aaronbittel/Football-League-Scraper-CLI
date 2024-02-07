@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Bundesliga-Scraper"
+version = "0.0.1"
+authors = [
+  {name = "Aaron Bittel"},
+]
+dependencies = [
+  "argparse"
+]
+
+
+[project.scripts]
+get = "bundesliga_scraper.__main__:main"

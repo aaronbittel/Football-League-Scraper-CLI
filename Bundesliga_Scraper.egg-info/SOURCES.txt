@@ -1,0 +1,8 @@
+pyproject.toml
+Bundesliga_Scraper.egg-info/PKG-INFO
+Bundesliga_Scraper.egg-info/SOURCES.txt
+Bundesliga_Scraper.egg-info/dependency_links.txt
+Bundesliga_Scraper.egg-info/entry_points.txt
+Bundesliga_Scraper.egg-info/requires.txt
+Bundesliga_Scraper.egg-info/top_level.txt
+bundesliga_scraper/__main__.py
