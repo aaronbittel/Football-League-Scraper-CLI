@@ -15,14 +15,12 @@ Its a terminal application with which a user can retrieve information (table, fi
     - the user can either specifiy for one request `bundesliga2 --table` to get the table for the 2. Bundesliga, but the session still remembers `bundesliga` as its main section
     - the user can swtich the main section within a session using `switch bundesliga2 (--table) optional`  to switch session and ask at the same time or just switch session
 - `bundesliga --table gameday (optional)` to get the specified table of the Bundesliga / 2. Bundesliga pretty printed to the terminal. The table should also contain the results of the last 5 games
-- image
     
     ![table](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/0e82326f-0075-44b6-b203-87fe9c33c990)
     
     ![table_extra](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/49eb0592-d128-46e3-a399-2ca1f3e574f0)
     
 - `bundesliga --fixture gameday (optional)` to get the specified fixture of the Bundesliga / 2. Bundesliga pretty printed to the terminal
-- image
     
     ![fixture](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/73a20f79-6386-408e-8c9b-5bc02614a48e)
 
