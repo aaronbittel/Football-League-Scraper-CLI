@@ -17,14 +17,14 @@ Its a terminal application with which a user can retrieve information (table, fi
 - `bundesliga --table gameday (optional)` to get the specified table of the Bundesliga / 2. Bundesliga pretty printed to the terminal. The table should also contain the results of the last 5 games
 - image
     
-    ![Untitled](Readme%20d311bf741ee94175a616d206582e8778/Untitled.png)
+    ![table](/repository/images/table.png?raw=true "table display")
     
-    ![Untitled](Readme%20d311bf741ee94175a616d206582e8778/Untitled%201.png)
+    ![last_5_games_results](/repository/images/table_extra.png?raw=true "results of last 5 games")
     
 - `bundesliga --fixture gameday (optional)` to get the specified fixture of the Bundesliga / 2. Bundesliga pretty printed to the terminal
 - image
     
-    ![Untitled](Readme%20d311bf741ee94175a616d206582e8778/Untitled%202.png)
+    ![fixture](/repository/images/fixture.png?raw=true "fixture display")
     
 
 ## What are the sprinkles?
