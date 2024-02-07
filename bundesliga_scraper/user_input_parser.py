@@ -3,6 +3,8 @@
 import argparse
 import sys
 
+from bundesliga_scraper import data_fetcher
+
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
 
@@ -23,7 +25,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "league",
         default="bundesliga",
-        choices=["bundesliga", "bundesliga_2"],
+        choices=["bundesliga", "2_bundesliga"],
         help="Executing the command for the given league",
     )
 
@@ -105,29 +107,31 @@ def handle_args(args: dict[str, str | int]) -> None:
         args (dict[str, str  |  int]): dict of key value pairs given by the user
     """
     if args["table"]:
-        handle_table(
+        handle_table_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["table"],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
     if args["fixture"]:
-        handle_fixture(
+        handle_fixture_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["fixture"],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
 
-def handle_table(league: str, gameday: int) -> None:
+def handle_table_request(league: str, gameday: int) -> None:
     """Handling the table request
 
     Args:
         league (str): supplied league
         gameday (int): gameday for the table
     """
-    print(f"fetching {league} table data for the gameday {gameday}")
+    table_entries_list = data_fetcher.get_table_information(
+        league=league, gameday=gameday
+    )
 
 
-def handle_fixture(league: str, gameday: int) -> None:
+def handle_fixture_request(league: str, gameday: int) -> None:
     """Handling fixture request
 
     Args:

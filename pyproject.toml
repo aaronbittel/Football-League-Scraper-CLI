@@ -9,7 +9,9 @@ authors = [
   {name = "Aaron Bittel"},
 ]
 dependencies = [
-  "argparse"
+  "argparse",
+  "requests",
+  "beautifulsoup4"
 ]
 
 
