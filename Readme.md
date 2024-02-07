@@ -17,15 +17,14 @@ Its a terminal application with which a user can retrieve information (table, fi
 - `bundesliga --table gameday (optional)` to get the specified table of the Bundesliga / 2. Bundesliga pretty printed to the terminal. The table should also contain the results of the last 5 games
 - image
     
-    ![table](/repository/images/table.png?raw=true "table display")
+    ![table](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/0e82326f-0075-44b6-b203-87fe9c33c990)
     
-    ![last_5_games_results](/repository/images/table_extra.png?raw=true "results of last 5 games")
+    ![table_extra](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/49eb0592-d128-46e3-a399-2ca1f3e574f0)
     
 - `bundesliga --fixture gameday (optional)` to get the specified fixture of the Bundesliga / 2. Bundesliga pretty printed to the terminal
 - image
     
-    ![fixture](/repository/images/fixture.png?raw=true "fixture display")
-    
+    ![fixture](https://github.com/AaronBittel/Football-League-Scraper-CLI-/assets/148724144/73a20f79-6386-408e-8c9b-5bc02614a48e)
 
 ## What are the sprinkles?
 
