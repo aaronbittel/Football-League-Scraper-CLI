@@ -42,7 +42,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--fixture",
         nargs="?",
-        const=21,
+        const=20,
         type=int,
         help="Displaying the fixture / results of the given gameday \
             (defaults to current)",
@@ -61,7 +61,7 @@ def create_parser() -> argparse.ArgumentParser:
         "--disable-debug",
         action="store_true",
         help="Fetches data from the web when flag is used",
-        dest="disable_debug"
+        dest="disable_debug",
     )
 
     return parser
@@ -121,18 +121,24 @@ def handle_args(args: dict[str, str | int]) -> None:
         handle_table_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["table"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args["disable_debug"] # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args[
+                "disable_debug"
+            ],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
     if args["fixture"]:
         handle_fixture_request(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             gameday=args["fixture"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args["disable_debug"] # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args[
+                "disable_debug"
+            ],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
 
-def handle_table_request(league: str, gameday: int, disable_debug: bool = False) -> None:
+def handle_table_request(
+    league: str, gameday: int, disable_debug: bool = False
+) -> None:
     """Handling the table request
 
     Args:
@@ -144,13 +150,19 @@ def handle_table_request(league: str, gameday: int, disable_debug: bool = False)
         league=league, gameday=gameday, disable_debug=disable_debug
     )
 
-    print(f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{"Matches":>37}{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}{Style.RESET_ALL}")
+    styled_column_str = f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{"Matches":>37}"
+    styled_column_str += f"{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}"
+    styled_column_str += f"{Style.RESET_ALL}"
+
+    print(styled_column_str)
 
     for placement, entry in enumerate(table_entries_list, start=1):
-        print(f"{placement:<4}{entry.style_entry()}")
+        print(f"{placement:<4}{entry.styled_entry()}")
 
 
-def handle_fixture_request(league: str, gameday: int, disable_debug: bool = False) -> None:
+def handle_fixture_request(
+    league: str, gameday: int, disable_debug: bool = False
+) -> None:
     """Handling fixture request
 
     Args:
@@ -159,4 +171,12 @@ def handle_fixture_request(league: str, gameday: int, disable_debug: bool = Fals
         disable_debug (bool): when set to True fetches data from web
     """
 
-    print(f"fetching {league} fixture data (from web {disable_debug}) for the gameday {gameday}")
+    fixture_entries_list = data_fetcher.get_fixture_information(
+        league=league, gameday=gameday, disable_debug=disable_debug
+    )
+
+    for date, matches in fixture_entries_list.items():
+        print(f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{date}{Style.RESET_ALL}")
+        for fixture_entry in matches:
+            print(fixture_entry.styled_entry())
+        print()

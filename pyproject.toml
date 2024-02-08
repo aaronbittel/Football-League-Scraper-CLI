@@ -15,6 +15,10 @@ dependencies = [
   "colorama"
 ]
 
+[project.optional-dependencies]
+dev = [
+  "black"
+]
 
 [project.scripts]
 get = "bundesliga_scraper.__main__:main"
