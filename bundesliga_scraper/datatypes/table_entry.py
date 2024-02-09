@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Style
 
 from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import LEAGUE_TABELS_BASE_URLS
+from bundesliga_scraper.config import CURRENT_DIR, LEAGUE_TABELS_BASE_URLS
 
 
 @dataclass
@@ -56,7 +56,7 @@ def get_table_information(
         )
     else:
         print("Using local file to read data")
-        with open("bundesliga_table.txt", "r", encoding="utf-8") as f:
+        with open(CURRENT_DIR / "bundesliga_table.txt", "r", encoding="utf-8") as f:
             soup = BeautifulSoup(f.read(), "html.parser")
 
     return extract_table_information(soup)
