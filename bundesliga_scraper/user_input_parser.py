@@ -9,6 +9,11 @@ from bundesliga_scraper import data_fetcher
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
+LEAGUE_ABBR = {
+    "bundesliga": "BL",
+    "2_bundesliga": "2BL"
+}
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Creating the parser object and adding its arguments
@@ -94,14 +99,18 @@ def start_session(parser: argparse.ArgumentParser, league: str) -> None:
     """
 
     while True:
-        user_input = input(">>> ").split(" ")
+        user_input = input(f"({LEAGUE_ABBR[league.lower()]}) > ").split(" ")
 
-        if user_input[0].lower() == "exit":
+        if user_input[0].lower() in ["exit", "exit()", "close", "close()"]:
             sys.exit(0)
 
         user_args = ""
+        # if no league was given use league with which session started
         if user_input[0] in FLAGS:
             user_args = [league] + user_input
+        elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
+            league = user_input[0]
+            user_args = user_input
         else:
             user_args = user_input
 
