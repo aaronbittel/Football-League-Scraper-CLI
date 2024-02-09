@@ -5,7 +5,7 @@ import sys
 
 from colorama import Back, Fore, Style
 
-from bundesliga_scraper import data_fetcher
+from bundesliga_scraper.datatypes import fixture_entry, table_entry
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
@@ -105,7 +105,7 @@ def start_session(parser: argparse.ArgumentParser, league: str) -> None:
             sys.exit(0)
 
         user_args = ""
-        # if no league was given use league with which session started
+        # if no league was given use league with which session was started
         if user_input[0] in FLAGS:
             user_args = [league] + user_input
         elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
@@ -155,7 +155,7 @@ def handle_table_request(
         gameday (int): gameday for the table
         disable_debug (bool): when set to True fetches data from web
     """
-    table_entries_list = data_fetcher.get_table_information(
+    table_entries_list = table_entry.get_table_information(
         league=league, gameday=gameday, disable_debug=disable_debug
     )
 
@@ -180,12 +180,12 @@ def handle_fixture_request(
         disable_debug (bool): when set to True fetches data from web
     """
 
-    fixture_entries_list = data_fetcher.get_fixture_information(
+    fixture_entries_list = fixture_entry.get_fixture_information(
         league=league, gameday=gameday, disable_debug=disable_debug
     )
 
     for date, matches in fixture_entries_list.items():
         print(f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{date}{Style.RESET_ALL}")
-        for fixture_entry in matches:
-            print(fixture_entry.styled_entry())
+        for entry in matches:
+            print(entry.styled_entry())
         print()
