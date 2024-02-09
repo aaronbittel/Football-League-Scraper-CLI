@@ -28,11 +28,26 @@ class TableEntry:
         repr_str = f"{placement:<4}"
         repr_str += f"{self.team_name:<30}{self.games:^5}{self.wins:^3}{self.ties:^3}"
         repr_str += f"{self.defeats:^3}{self.goals[0]:>4}:{self.goals[1]:<4}"
-        repr_str += f"{Fore.GREEN if self.diff >= 0 else Fore.RED}"
-        repr_str += f"{self.diff:+}".center(5)
+        repr_str += self._styled_diff_str()
         repr_str += f"{Style.RESET_ALL}{Style.BRIGHT}{self.points:^5}{Style.RESET_ALL}"
 
         return repr_str
+    
+
+    def _styled_diff_str(self) -> str:
+        """Returns a styled diff string based on the number
+        
+        Green if > 0, White == 0 and Red < 0
+        """
+        repr_str = ""
+        if self.diff > 0:
+            repr_str += f"{Fore.GREEN}"
+        elif self.diff < 0:
+            repr_str += f"{Fore.RED}"
+        else:
+            repr_str += f"{Fore.WHITE}"
+        repr_str += f"{self.diff:+}".center(5)
+        return repr_str + f"{Style.RESET_ALL}"
 
 
 class MatchdayTable(FootballData):
@@ -48,9 +63,7 @@ class MatchdayTable(FootballData):
         soup = None
         if self.disable_debug:
             print("Fetching data from web ...")
-            soup = data_fetcher.fetch_html(
-                f"{LEAGUE_TABELS_BASE_URLS[self.league.lower()]}{self.matchday}"
-            )
+            soup = data_fetcher.fetch_html(f"{LEAGUE_TABELS_BASE_URLS[self.league.lower()]}{self.matchday}")
         else:
             print("Using local file to read data")
             with open(CURRENT_DIR / "bundesliga_table.txt", "r", encoding="utf-8") as f:
@@ -81,16 +94,18 @@ class MatchdayTable(FootballData):
             soup (BeautifulSoup): soup object containing the html
 
         """
-        table = soup.find("table")
-        trs = table.find_all(  # pyright: ignore[reportGeneralTypeIssues, reportOptionalMemberAccess]
-            "tr"
-        )
 
-        for tr in trs[1:]:  # first table row is column information
-            team = tr.find("img")["alt"]
-            _, wins_ties_defeats, _, _, goals, _, *_ = [
+        table = soup.select_one("table")
+
+        if not table:
+            return
+
+        for tr in table.find_all("tr")[1:]:  # first table row is column information
+            team_name = tr.find("img")["alt"]
+
+            _, wins_ties_defeats, _, _, goals, _, *_ = list(
                 td for td in tr.find_all("td", class_="kick__table--ranking__number")
-            ]
+            )
 
             wins, ties, defeats = list(
                 map(
@@ -101,17 +116,17 @@ class MatchdayTable(FootballData):
                 )
             )
 
-            goals = tuple(map(int, goals.text.replace("\n", "").strip().split(":")))
+            goals = tuple(map(int, goals.get_text(strip=True).split(":")))
 
             self.table_entries.append(
                 TableEntry(
-                    team_name=team,
+                    team_name=team_name,
                     points=wins * 3 + ties,
                     games=wins + ties + defeats,
                     wins=wins,
                     ties=ties,
                     defeats=defeats,
-                    goals=goals,  # pyright: ignore[reportGeneralTypeIssues]
+                    goals=goals,  # pyright: ignore[reportGeneralTypeIssues, reportArgumentType]
                     diff=goals[0] - goals[1],
                 )
             )

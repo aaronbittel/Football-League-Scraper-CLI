@@ -79,11 +79,7 @@ class MatchdayFixture(FootballData):
                 with open(CURRENT_DIR / "bundesliga_fixture.txt", "r", encoding="utf-8") as f:
                     soup = BeautifulSoup(f.read(), "html.parser")
             else:
-                with open(
-                    CURRENT_DIR / "bundesliga_fixture_not_played.txt",
-                    "r",
-                    encoding="utf-8",
-                ) as f:
+                with open(CURRENT_DIR / "bundesliga_fixture_not_played.txt", "r", encoding="utf-8") as f:
                     soup = BeautifulSoup(f.read(), "html.parser")
 
         self._extract_fixture_information(soup)
@@ -109,14 +105,16 @@ class MatchdayFixture(FootballData):
 
         datetime_object = datetime.now()
 
-        if fixture_component:
-            for tag in fixture_component.find_all():
-                if tag.name == "match-date-header":
-                    datetime_object = extract_datetime(tag)
-                    self.complete_fixture[datetime_object] = []
+        if not fixture_component:
+            return
 
-                elif tag.name == "div" and "matchRow" in tag.attrs["class"]:
-                    self.complete_fixture[datetime_object].append(extract_match(tag))
+        for tag in fixture_component.find_all():
+            if tag.name == "match-date-header":
+                datetime_object = extract_datetime(tag)
+                self.complete_fixture[datetime_object] = []
+
+            elif tag.name == "div" and "matchRow" in tag.attrs["class"]:
+                self.complete_fixture[datetime_object].append(extract_match(tag))
 
 
 def styled_date(date: datetime) -> str:
