@@ -131,18 +131,14 @@ def handle_args(args: dict[str, str | int]) -> None:
         data = MatchdayTable(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             matchday=args["table"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args[
-                "disable_debug"
-            ],  # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args["disable_debug"],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
     if args["fixture"]:
         data = MatchdayFixture(
             league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
             matchday=args["fixture"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args[
-                "disable_debug"
-            ],  # pyright: ignore[reportGeneralTypeIssues]
+            disable_debug=args["disable_debug"],  # pyright: ignore[reportGeneralTypeIssues]
         )
 
     handle_data(data)

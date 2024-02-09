@@ -1,9 +1,9 @@
 """Module representing a fixture entry"""
 
-import re
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 
 from bs4 import BeautifulSoup, element
 from colorama import Back, Fore, Style
@@ -39,9 +39,7 @@ class FixtureEntry:
 
         MAGENTA if home team won else WHITE
         """
-        styled_str = (
-            f"{Fore.MAGENTA if self.home_goals > self.away_goals else Fore.WHITE}"
-        )
+        styled_str = f"{Fore.MAGENTA if self.home_goals > self.away_goals else Fore.WHITE}"
         styled_str += f"{self.home_team:>30}{Style.RESET_ALL}"
         return styled_str
 
@@ -50,9 +48,7 @@ class FixtureEntry:
 
         MAGENTA if away team won else WHITE
         """
-        style_str = (
-            f"{Fore.MAGENTA if self.away_goals > self.home_goals else Fore.WHITE}"
-        )
+        style_str = f"{Fore.MAGENTA if self.away_goals > self.home_goals else Fore.WHITE}"
         style_str += f"{self.away_team}{Style.RESET_ALL}"
         return style_str
 
@@ -76,15 +72,11 @@ class MatchdayFixture(FootballData):
 
         if self.disable_debug:
             print("Fetching data from the web ...")
-            soup = data_fetcher.fetch_html(
-                f"{LEAGUE_FIXTURES_BASE_URLS[self.league.lower()]}{self.matchday}"
-            )
+            soup = data_fetcher.fetch_html(f"{LEAGUE_FIXTURES_BASE_URLS[self.league.lower()]}{self.matchday}")
         else:
             print("Using local file to read data")
             if self.matchday < 21:
-                with open(
-                    CURRENT_DIR / "bundesliga_fixture.txt", "r", encoding="utf-8"
-                ) as f:
+                with open(CURRENT_DIR / "bundesliga_fixture.txt", "r", encoding="utf-8") as f:
                     soup = BeautifulSoup(f.read(), "html.parser")
             else:
                 with open(
@@ -105,10 +97,7 @@ class MatchdayFixture(FootballData):
             styled_string += "\n"
         return styled_string
 
-    def _extract_fixture_information(
-        self,
-        soup: BeautifulSoup,
-    ) -> None:
+    def _extract_fixture_information(self, soup: BeautifulSoup) -> None:
         """Extracts the fixture data from the soup object and returns it as a list of
         FixtureEntries
 
@@ -116,29 +105,23 @@ class MatchdayFixture(FootballData):
             soup (BeautifulSoup): soup object containing the html
 
         """
-        fixture_comp = soup.find(
-            "fixturescomponent"
-        ).div  # pyright: ignore[reportGeneralTypeIssues, reportOptionalMemberAccess]
+        fixture_component: Optional[element.Tag] = soup.select_one("fixturescomponent > div")
 
         datetime_object = datetime.now()
 
-        for (
-            tag
-        ) in fixture_comp.find_all():  # pyright: ignore[reportOptionalMemberAccess]
-            if tag.name == "match-date-header":
-                datetime_object = extract_datetime(tag.text)
-                self.complete_fixture[datetime_object] = []
+        if fixture_component:
+            for tag in fixture_component.find_all():
+                if tag.name == "match-date-header":
+                    datetime_object = extract_datetime(tag)
+                    self.complete_fixture[datetime_object] = []
 
-            elif tag.name == "div" and "matchRow" in tag.attrs["class"]:
-                self.complete_fixture[datetime_object].append(extract_match(tag))
+                elif tag.name == "div" and "matchRow" in tag.attrs["class"]:
+                    self.complete_fixture[datetime_object].append(extract_match(tag))
 
 
 def styled_date(date: datetime) -> str:
     """Returns a styled datetime"""
-    return (
-        f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT} {date} {Style.RESET_ALL}"
-        + "\n"
-    )
+    return f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT} {date} {Style.RESET_ALL}" + "\n"
 
 
 def extract_match(tag: element.Tag) -> FixtureEntry:
@@ -150,14 +133,9 @@ def extract_match(tag: element.Tag) -> FixtureEntry:
     Returns:
         FixtureEntry: FixtureEntry
     """
-    home_team, away_team = [
-        clublogo.img["alt"] for clublogo in tag.find_all("clublogo")
-    ]
 
-    home_goals, away_goals = [score.text for score in tag.find_all(class_="score")]
-
-    home_goals = re.sub(r"\s+", "", home_goals)
-    away_goals = re.sub(r"\s+", "", away_goals)
+    home_team, away_team = [clublogo.img["alt"] for clublogo in tag.find_all("clublogo")]
+    home_goals, away_goals = [score.get_text(strip=True) for score in tag.find_all(class_="score")]
 
     played = False
     if home_goals.isdigit():
@@ -176,9 +154,10 @@ def extract_match(tag: element.Tag) -> FixtureEntry:
     )
 
 
-def extract_datetime(tag_str: str) -> datetime:
+def extract_datetime(time_tag: element.Tag) -> datetime:
     """Extracting datetime object from a tag"""
-    _, _, date_string, time_string, *_ = re.sub(r"\s+", " ", tag_str).split(" ")
+    _, date_string, time_string = time_tag.get_text(" ", strip=True).split(" ")
+
     date_object = datetime.strptime(date_string, "%d-%b-%Y").date()
     time_object = datetime.strptime(time_string, "%H:%M").time()
 

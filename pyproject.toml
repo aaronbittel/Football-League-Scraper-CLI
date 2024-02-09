@@ -20,5 +20,8 @@ dev = [
   "black"
 ]
 
+[tool.black]
+line-length = 120
+
 [project.scripts]
 get = "bundesliga_scraper.__main__:main"
