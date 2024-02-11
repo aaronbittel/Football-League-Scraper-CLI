@@ -1,7 +1,0 @@
-argparse
-requests
-beautifulsoup4
-colorama
-
-[dev]
-black
