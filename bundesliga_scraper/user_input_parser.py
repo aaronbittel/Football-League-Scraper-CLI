@@ -4,8 +4,8 @@ import argparse
 import sys
 
 from bundesliga_scraper.datatypes.data import FootballData
-from bundesliga_scraper.datatypes.fixture_entry import MatchdayFixture
-from bundesliga_scraper.datatypes.table_entry import MatchdayTable
+from bundesliga_scraper.datatypes.matchday_fixture import MatchdayFixture
+from bundesliga_scraper.datatypes.matchday_table import MatchdayTable
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
@@ -129,16 +129,16 @@ def handle_args(args: dict[str, str | int]) -> None:
 
     if args["table"]:
         data = MatchdayTable(
-            league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
-            matchday=args["table"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args["disable_debug"],  # pyright: ignore[reportGeneralTypeIssues]
+            league=args["league"],  # pyright: ignore[reportArgumentType]
+            matchday=args["table"],  # pyright: ignore[reportArgumentType]
+            disable_debug=args["disable_debug"],  # pyright: ignore[reportArgumentType]
         )
 
     if args["fixture"]:
         data = MatchdayFixture(
-            league=args["league"],  # pyright: ignore[reportGeneralTypeIssues]
-            matchday=args["fixture"],  # pyright: ignore[reportGeneralTypeIssues]
-            disable_debug=args["disable_debug"],  # pyright: ignore[reportGeneralTypeIssues]
+            league=args["league"],  # pyright: ignore[reportArgumentType]
+            matchday=args["fixture"],  # pyright: ignore[reportArgumentType]
+            disable_debug=args["disable_debug"],  # pyright: ignore[reportArgumentType]
         )
 
     handle_data(data)
