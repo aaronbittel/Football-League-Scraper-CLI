@@ -3,9 +3,13 @@
 import argparse
 import sys
 
-from bundesliga_scraper.datatypes.data import FootballData
-from bundesliga_scraper.datatypes.matchday_fixture import MatchdayFixture
-from bundesliga_scraper.datatypes.matchday_table import MatchdayTable
+from bundesliga_scraper import data_fetcher
+from bundesliga_scraper.config import LEAGUE_FIXTURES_BASE_URLS, LEAGUE_TABELS_BASE_URLS
+from bundesliga_scraper.data_extractors import (
+    bundesliga_fixture_extractor,
+    bundesliga_table_extractor,
+)
+from bundesliga_scraper.data_printer import fixture_printer, table_printer
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
@@ -115,21 +119,45 @@ def handle_args(args: dict[str, str | int]) -> None:
         return
 
     if args["table"]:
-        data = MatchdayTable(
-            league=args["league"],
-            matchday=args["table"],
-        )
+        handle_table_request(args)
 
     if args["fixture"]:
-        data = MatchdayFixture(
-            league=args["league"],
-            matchday=args["fixture"],
-        )
-
-    handle_data(data)
+        handle_fixture_request(args)
 
 
-def handle_data(data: FootballData) -> None:
-    """Loading data and printing the styled string to the terminal."""
-    data.load()
-    print(data.to_styled_string())
+def handle_table_request(args: dict[str, str | int]) -> None:
+    """Handles the table request.
+
+    Args:
+        args (dict[str, str  |  int]): user arguments
+    """
+    league = args["league"]
+    matchday = args["table"]
+
+    print("Fetching data from web ...\n")
+    soup = data_fetcher.fetch_html(
+        f"{LEAGUE_TABELS_BASE_URLS[league.lower()]}{matchday}"
+    )
+    table_entries = bundesliga_table_extractor.extract_bundesliga_table_information(
+        soup
+    )
+
+    print(table_printer.styled_bundesliga_table_information(table_entries))
+
+
+def handle_fixture_request(args: dict[str, str | int]) -> None:
+    """Handles the fixture request.
+
+    Args:
+        args (dict[str, str  |  int]): user arguments
+    """
+    league = args["league"]
+    matchday = args["fixture"]
+
+    print("Fetching data from the web ...\n")
+    soup = data_fetcher.fetch_html(
+        f"{LEAGUE_FIXTURES_BASE_URLS[league.lower()]}{matchday}"
+    )
+
+    fixture = bundesliga_fixture_extractor.extract_bundesliga_fixture_information(soup)
+    print(fixture_printer.styled_bundesliga_fixure(fixture))
