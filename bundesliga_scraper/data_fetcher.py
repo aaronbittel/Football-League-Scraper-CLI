@@ -1,13 +1,11 @@
-"""Module for fetching requested data and extracting information from HTML using 
-request
-"""
+"""Fetching requested data and extracting information from HTML."""
 
 import requests
 from bs4 import BeautifulSoup
 
 
 def fetch_html(url: str) -> BeautifulSoup:
-    """Fetching the html for the given url
+    """Fetching the html for the given url.
 
     Args:
         url (str): url

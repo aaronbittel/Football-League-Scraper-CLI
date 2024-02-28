@@ -1,4 +1,4 @@
-"""Module for all configurations"""
+"""Module for all configurations."""
 
 import os
 from pathlib import Path

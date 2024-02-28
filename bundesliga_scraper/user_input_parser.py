@@ -1,4 +1,4 @@
-"""Module for parsing the users input"""
+"""Module for parsing the users input."""
 
 import argparse
 import sys
@@ -13,12 +13,11 @@ LEAGUE_ABBR = {"bundesliga": "BL", "2_bundesliga": "2BL"}
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Creating the parser object and adding its arguments
+    """Creating the parser object and adding its arguments.
 
     Returns:
         argparse.ArgumentParser: parser
     """
-
     parser = argparse.ArgumentParser(
         prog="Bundesliga Scraper",
         description="Scraping the Bundesliga",
@@ -70,12 +69,11 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def parse_user_args(parser: argparse.ArgumentParser) -> None:
-    """Parsing the arguments given by the user
+    """Parsing the arguments given by the user.
 
     Args:
         parser (argparse.ArgumentParser): parser
     """
-
     args = parser.parse_args()
 
     if not any((args.table, args.fixture, args.session)):
@@ -88,13 +86,12 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
 
 
 def start_session(parser: argparse.ArgumentParser, league: str) -> None:
-    """Controls the flow of the program inside a session
+    """Controls the flow of the program inside a session.
 
     Args:
         parser (argparse.ArgumentParser): parser
         league (str): the league the user created the session with
     """
-
     while True:
         user_input = input(f"({LEAGUE_ABBR[league.lower()]}) > ").split(" ")
 
@@ -117,34 +114,32 @@ def start_session(parser: argparse.ArgumentParser, league: str) -> None:
 
 
 def handle_args(args: dict[str, str | int]) -> None:
-    """Handling the arguments given by the user
+    """Handling the arguments given by the user.
 
     Args:
         args (dict[str, str  |  int]): dict of key value pairs given by the user
     """
-
-    # data = FootballTable(league="bundesliga", matchday=1)
     if not args["table"] and not args["fixture"]:
         return
 
     if args["table"]:
         data = MatchdayTable(
-            league=args["league"],  # pyright: ignore[reportArgumentType]
-            matchday=args["table"],  # pyright: ignore[reportArgumentType]
-            disable_debug=args["disable_debug"],  # pyright: ignore[reportArgumentType]
+            league=args["league"],
+            matchday=args["table"],
+            disable_debug=args["disable_debug"],
         )
 
     if args["fixture"]:
         data = MatchdayFixture(
-            league=args["league"],  # pyright: ignore[reportArgumentType]
-            matchday=args["fixture"],  # pyright: ignore[reportArgumentType]
-            disable_debug=args["disable_debug"],  # pyright: ignore[reportArgumentType]
+            league=args["league"],
+            matchday=args["fixture"],
+            disable_debug=args["disable_debug"],
         )
 
     handle_data(data)
 
 
 def handle_data(data: FootballData) -> None:
-    """Loading data and printing the styled string to the terminal"""
+    """Loading data and printing the styled string to the terminal."""
     data.load()
     print(data.to_styled_string())
