@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from colorama import Back, Fore, Style
 
 from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import CURRENT_DIR, LEAGUE_TABELS_BASE_URLS
+from bundesliga_scraper.config import LEAGUE_TABELS_BASE_URLS
 from bundesliga_scraper.datatypes.data import FootballData
 from bundesliga_scraper.datatypes.table_entry import TableEntry
 
@@ -12,24 +12,23 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 class MatchdayTable(FootballData):
     """Class representing a Football table."""
 
-    def __init__(self, league: str, matchday: int, disable_debug: bool = False) -> None:
+    def __init__(self, league: str, matchday: int) -> None:
+        """Initializing MatchdayTable.
+
+        Args:
+            league (str): name of the Football league
+            matchday (int): matchday of table
+        """
         self.league = league
         self.matchday = matchday
-        self.disable_debug = disable_debug
         self.table_entries: list[TableEntry] = []
 
     def load(self) -> None:
-        soup = None
-        if self.disable_debug:
-            print("Fetching data from web ...")
-            soup = data_fetcher.fetch_html(
-                f"{LEAGUE_TABELS_BASE_URLS[self.league.lower()]}{self.matchday}"
-            )
-        else:
-            print("Using local file to read data")
-            with open(CURRENT_DIR / "bundesliga_table.txt", encoding="utf-8") as f:
-                soup = BeautifulSoup(f.read(), "html.parser")
-
+        """Loads data from the web."""
+        print("Fetching data from web ...")
+        soup = data_fetcher.fetch_html(
+            f"{LEAGUE_TABELS_BASE_URLS[self.league.lower()]}{self.matchday}"
+        )
         self._extract_table_information(soup)
 
     def _styled_table_columns(self) -> str:
@@ -42,6 +41,7 @@ class MatchdayTable(FootballData):
         return styled_column_str + "\n"
 
     def to_styled_string(self) -> str:
+        """Returns a styled matchday string representation."""
         style_string = self._styled_table_columns()
         style_string += "\n".join(
             entry.styled_entry(placement)
@@ -87,7 +87,7 @@ class MatchdayTable(FootballData):
                     wins=wins,
                     ties=ties,
                     defeats=defeats,
-                    goals=goals,  # pyright: ignore[reportGeneralTypeIssues, reportArgumentType]
+                    goals=goals,
                     diff=goals[0] - goals[1],
                 )
             )

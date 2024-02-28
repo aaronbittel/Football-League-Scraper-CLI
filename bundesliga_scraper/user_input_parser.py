@@ -57,14 +57,6 @@ def create_parser() -> argparse.ArgumentParser:
         help="Starts a session for the given league -> league is now default",
     )
 
-    parser.add_argument(
-        "-dd",
-        "--disable-debug",
-        action="store_true",
-        help="Fetches data from the web when flag is used",
-        dest="disable_debug",
-    )
-
     return parser
 
 
@@ -117,7 +109,7 @@ def handle_args(args: dict[str, str | int]) -> None:
     """Handling the arguments given by the user.
 
     Args:
-        args (dict[str, str  |  int]): dict of key value pairs given by the user
+        args (dict[str, str | int]): dict of key value pairs given by the user
     """
     if not args["table"] and not args["fixture"]:
         return
@@ -126,14 +118,12 @@ def handle_args(args: dict[str, str | int]) -> None:
         data = MatchdayTable(
             league=args["league"],
             matchday=args["table"],
-            disable_debug=args["disable_debug"],
         )
 
     if args["fixture"]:
         data = MatchdayFixture(
             league=args["league"],
             matchday=args["fixture"],
-            disable_debug=args["disable_debug"],
         )
 
     handle_data(data)

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, element
 from colorama import Back, Fore, Style
 
 from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import CURRENT_DIR, LEAGUE_FIXTURES_BASE_URLS
+from bundesliga_scraper.config import LEAGUE_FIXTURES_BASE_URLS
 from bundesliga_scraper.datatypes.data import FootballData
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
@@ -19,43 +19,28 @@ class MatchdayFixture(FootballData):
     html source as well as style them as strings
     """
 
-    def __init__(
-        self, league: str, matchday: int, disable_debug: bool = False
-    ) -> None:
+    def __init__(self, league: str, matchday: int) -> None:
+        """Initialize matchday fixture.
+
+        Args:
+            league (str): name of the Football league
+            matchday (int): matchday number
+        """
         self.league = league
         self.matchday = matchday
-        self.disable_debug = disable_debug
-        self.complete_fixture: OrderedDict[
-            datetime, list[FixtureEntry]
-        ] = OrderedDict()
+        self.complete_fixture: OrderedDict[datetime, list[FixtureEntry]] = OrderedDict()
 
     def load(self) -> None:
         """Loading fixture."""
-        soup = None
-
-        if self.disable_debug:
-            print("Fetching data from the web ...")
-            soup = data_fetcher.fetch_html(
-                f"{LEAGUE_FIXTURES_BASE_URLS[self.league.lower()]}{self.matchday}"
-            )
-        else:
-            print("Using local file to read data")
-            if self.matchday < 21:
-                with open(
-                    CURRENT_DIR / "bundesliga_fixture.txt",
-                    encoding="utf-8",
-                ) as f:
-                    soup = BeautifulSoup(f.read(), "html.parser")
-            else:
-                with open(
-                    CURRENT_DIR / "bundesliga_fixture_not_played.txt",
-                    encoding="utf-8",
-                ) as f:
-                    soup = BeautifulSoup(f.read(), "html.parser")
+        print("Fetching data from the web ...")
+        soup = data_fetcher.fetch_html(
+            f"{LEAGUE_FIXTURES_BASE_URLS[self.league.lower()]}{self.matchday}"
+        )
 
         self._extract_fixture_information(soup)
 
     def to_styled_string(self) -> str:
+        """Returns a styled string representation of the matchday fixture."""
         styled_string = ""
         for date, matches in self.complete_fixture.items():
             styled_string += styled_date(date)
@@ -86,9 +71,7 @@ class MatchdayFixture(FootballData):
                 self.complete_fixture[datetime_object] = []
 
             elif tag.name == "div" and "matchRow" in tag.attrs["class"]:
-                self.complete_fixture[datetime_object].append(
-                    extract_match(tag)
-                )
+                self.complete_fixture[datetime_object].append(extract_match(tag))
 
 
 def styled_date(date: datetime) -> str:
@@ -140,6 +123,4 @@ def extract_datetime(time_tag: element.Tag) -> datetime:
     time_object = datetime.strptime(time_string, "%H:%M").time()
 
     # plus 1 hour because somehow I get -1 hour
-    return datetime.combine(date=date_object, time=time_object) + timedelta(
-        hours=1
-    )
+    return datetime.combine(date=date_object, time=time_object) + timedelta(hours=1)
