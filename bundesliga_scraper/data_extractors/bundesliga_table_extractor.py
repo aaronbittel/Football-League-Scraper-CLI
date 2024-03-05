@@ -16,7 +16,7 @@ def extract_bundesliga_table_information(soup: BeautifulSoup) -> list[TableEntry
     table = soup.select_one("table")
 
     if not table:
-        return
+        return None
 
     table_entries: list[TableEntry] = []
 

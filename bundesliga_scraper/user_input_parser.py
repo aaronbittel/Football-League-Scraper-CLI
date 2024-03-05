@@ -1,15 +1,11 @@
-"""Module for parsing the users input."""
+"""Parsing the users input."""
+
+from __future__ import annotations
 
 import argparse
 import sys
 
-from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import LEAGUE_FIXTURES_BASE_URLS, LEAGUE_TABELS_BASE_URLS
-from bundesliga_scraper.data_extractors import (
-    bundesliga_fixture_extractor,
-    bundesliga_table_extractor,
-)
-from bundesliga_scraper.data_printer import fixture_printer, table_printer
+from bundesliga_scraper.request_handler import request_handler
 
 FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
 
@@ -75,7 +71,7 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
     if not any((args.table, args.fixture, args.session)):
         parser.print_help()
 
-    handle_args(vars(args))  # convert Namespace to dictionary
+    request_handler.handle_args(vars(args))  # convert Namespace to dictionary
 
     if args.session:
         start_session(parser, args.league)
@@ -97,7 +93,7 @@ def start_session(parser: argparse.ArgumentParser, league: str) -> None:
         user_args = ""
         # if no league was given use league with which session was started
         if user_input[0] in FLAGS:
-            user_args = [league] + user_input
+            user_args = [league, *user_input]
         elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
             league = user_input[0]
             user_args = user_input
@@ -106,58 +102,4 @@ def start_session(parser: argparse.ArgumentParser, league: str) -> None:
 
         args = parser.parse_args(user_args)
 
-        handle_args(vars(args))  # convert Namespace to dictionary
-
-
-def handle_args(args: dict[str, str | int]) -> None:
-    """Handling the arguments given by the user.
-
-    Args:
-        args (dict[str, str | int]): dict of key value pairs given by the user
-    """
-    if not args["table"] and not args["fixture"]:
-        return
-
-    if args["table"]:
-        handle_table_request(args)
-
-    if args["fixture"]:
-        handle_fixture_request(args)
-
-
-def handle_table_request(args: dict[str, str | int]) -> None:
-    """Handles the table request.
-
-    Args:
-        args (dict[str, str  |  int]): user arguments
-    """
-    league = args["league"]
-    matchday = args["table"]
-
-    print("Fetching data from web ...\n")
-    soup = data_fetcher.fetch_html(
-        f"{LEAGUE_TABELS_BASE_URLS[league.lower()]}{matchday}"
-    )
-    table_entries = bundesliga_table_extractor.extract_bundesliga_table_information(
-        soup
-    )
-
-    print(table_printer.styled_bundesliga_table_information(table_entries))
-
-
-def handle_fixture_request(args: dict[str, str | int]) -> None:
-    """Handles the fixture request.
-
-    Args:
-        args (dict[str, str  |  int]): user arguments
-    """
-    league = args["league"]
-    matchday = args["fixture"]
-
-    print("Fetching data from the web ...\n")
-    soup = data_fetcher.fetch_html(
-        f"{LEAGUE_FIXTURES_BASE_URLS[league.lower()]}{matchday}"
-    )
-
-    fixture = bundesliga_fixture_extractor.extract_bundesliga_fixture_information(soup)
-    print(fixture_printer.styled_bundesliga_fixure(fixture))
+        request_handler.handle_args(vars(args))  # convert Namespace to dictionary

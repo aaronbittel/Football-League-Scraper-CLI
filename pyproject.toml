@@ -23,7 +23,7 @@ dev = [
 [project.scripts]
 get = "bundesliga_scraper.__main__:main"
 
-# target-version = "py311"
+# target-version = "py310"
 
 [tool.ruff]
 # Same as Black.
@@ -31,23 +31,24 @@ line-length = 88
 indent-width = 4
 
 [tool.ruff.lint]
-select = [
-    "F", #Pyflakes
-    "B", #flake8-bugbear
-    "A", #flake8-builtins
-    "C4", #flake8-comprehensions
-    "I", #isort
-    "PT", #flake8-pytest-style
-    "C90", #mccabe
-    "N", #pep8-naming
-    "E", #pycodestyle error
-    "PL", #Pylint
-    "D", #pydocstyle
-    "UP", #pyupgrade
-    "ANN", #flake8-annotations
-    "ERA", #eradicate
-]
-ignore = ["D203", "D213", "D406", "D407", "D413", "ANN101"]
+# select = [
+#     "F", #Pyflakes
+#     "B", #flake8-bugbear
+#     "A", #flake8-builtins
+#     "C4", #flake8-comprehensions
+#     "I", #isort
+#     "PT", #flake8-pytest-style
+#     "C90", #mccabe
+#     "N", #pep8-naming
+#     "E", #pycodestyle error
+#     "PL", #Pylint
+#     "D", #pydocstyle
+#     "UP", #pyupgrade
+#     "ANN", #flake8-annotations
+#     "ERA", #eradicate
+# ]
+select = ["ALL"]
+ignore = ["D203", "D213", "D406", "D407", "D413", "ANN101", "COM812", "ISC001", "T201"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

@@ -22,7 +22,7 @@ def extract_bundesliga_fixture_information(
     datetime_object = datetime.now()
 
     if not fixture_component:
-        return
+        return None
 
     complete_fixture: dict[datetime, list[FixtureEntry]] = {}
 
