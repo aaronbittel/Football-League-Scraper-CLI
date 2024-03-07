@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import StrEnum
-
+from bundesliga_scraper.datatypes.table_entry import TableEntry
+from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 import requests
+from datetime import datetime
 
 BASE_URL = "https://api.openligadb.de"
 
@@ -13,66 +14,71 @@ class League(StrEnum):
     Bundesliga_2 = "bl2"
 
 
-@dataclass
-class TableEntry:
-    team_name: str
-    points: int
-    opponent_goals: int
-    goals: int
-    matches: int
-    won: int
-    lost: int
-    draw: int
-    goal_diff: int
-
-    @classmethod
-    def from_dict(cls, data: dict[str, str | int]) -> TableEntry:
-        return cls(
-            teamName=data["teamName"],
-            points=int(data["points"]),
-            opponentGoals=int(data["opponentGoals"]),
-            goals=int(data["goals"]),
-            matches=int(data["matches"]),
-            won=int(data["won"]),
-            lost=int(data["lost"]),
-            draw=int(data["draw"]),
-            goalDiff=int(data["goalDiff"]),
-        )
-
-
-def get_table(league: League, season: int) -> dict:
+def get_table(league: League, season: int = 2023) -> dict:
     """Fetches the Football table data for a particular league and a season."""
     url = build_get_table_url(league, season)
     response = requests.get(url, timeout=3)
     return response.json()
 
 
-def build_get_table_url(league: League, season: int) -> str:
+def build_get_table_url(league: League, season: int = 2023) -> str:
     return f"{BASE_URL}/getbltable/{league}/{season}"
 
 
-def retrieve_table(league: League, season: int) -> TableEntry:
+def retrieve_table(league: League, season: int = 2023) -> list[TableEntry]:
     data = get_table(league=league, season=season)
     return [TableEntry.from_dict(table_entry) for table_entry in data]
 
 
-def print_table_entry(table_entry: TableEntry, placement: int):
-    output = f"{placement:<4}"
-    output += f"{table_entry.team_name:<30}"
-    output += f"{table_entry.matches:<4}"
-    output += f"{table_entry.won:<4}"
-    output += f"{table_entry.lost:<4}"
-    output += f"{table_entry.draw:<4}"
-    output += f"{table_entry.goals:>3}:{table_entry.opponent_goals:<4}"
-    output += f"{table_entry.goal_diff:<4}"
-    output += f"{table_entry.points:<4}"
-    print(output)
+def retrieve_all_fixtures(
+    league: League, season: int = 2023
+) -> list[list[FixtureEntry]]:
+    all_fixtures_list = get_match_data(league=league, season=season)
+    all_fixtures = []
+    for i in range(34):
+        matchday = all_fixtures_list[i * 9 : (i * 9) + 9]
+        matchday_fixtures = []
+        for fixture in matchday:
+            matchday_fixtures.append(FixtureEntry.from_dict(fixture))
+        all_fixtures.append(matchday_fixtures)
+    return all_fixtures
+
+
+def get_match_data(league: League, season: int = 2023) -> dict:
+    url = build_get_match_data_url(league=league, season=season)
+    response = requests.get(url, timeout=3)
+    return response.json()
+
+
+def build_get_match_data_url(league: League, season: int = 2023) -> str:
+    return f"{BASE_URL}/getmatchdata/{league}/{season}"
+
+
+def retrieve_current_matchday(league: League) -> int:
+    url = build_get_current_matchday_url(league)
+    response = requests.get(url, timeout=3)
+    data = response.json()
+    return int(data["groupOrderID"])
+
+
+def build_get_current_matchday_url(league: League) -> str:
+    return f"{BASE_URL}/getcurrentgroup/{league}"
 
 
 def main():
-    bl_table = retrieve_table(League.Bundesliga, season=2023)
-    for placement, entry in enumerate(bl_table, start=1):
-        print_table_entry(entry, placement=placement)
+    all_fixtures = retrieve_all_fixtures(league=League.Bundesliga)
+    matchday = all_fixtures[23]
+
+    print(f"Matchday: {matchday[0].matchday}")
+    current_date = datetime.today()
+    for fixture in matchday:
+        date = fixture.date
+        if date != current_date:
+            current_date = date
+            print(date)
+        print(
+            f"{fixture.home_team:>30}{fixture.home_goals:>3}:{fixture.away_goals:<3}{fixture.away_team}"
+        )
 
 
 if __name__ == "__main__":

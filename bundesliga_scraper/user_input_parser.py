@@ -35,7 +35,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--table",
         nargs="?",
-        const=21,
+        const=-1,  # indicates current table
         type=int,
         help="Displaying the table of the given gameday (defaults to current)",
     )
@@ -43,7 +43,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--fixture",
         nargs="?",
-        const=20,
+        const=-1,  # indicates current fixture
         type=int,
         help="Displaying the fixture / results of the given gameday \
             (defaults to current)",

@@ -1,26 +1,30 @@
 """Handles requests for Football fixtures."""
 
 from __future__ import annotations
-
-from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import LEAGUE_FIXTURES_BASE_URLS
-from bundesliga_scraper.data_extractors import bundesliga_fixture_extractor
+from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
 
 
-def handle_fixture_request(args: dict[str, str | int]) -> None:
+def handle_fixture_request(user_args: dict[str, str | int]) -> None:
     """Handles the fixture request.
 
     Args:
-        args (dict[str, str  |  int]): user arguments
+        user_args (dict[str, str  |  int]): user arguments
     """
-    league = args["league"]
-    matchday = args["fixture"]
-
-    print("Fetching data from the web ...\n")
-    soup = data_fetcher.fetch_html(
-        f"{LEAGUE_FIXTURES_BASE_URLS[league.lower()]}{matchday}"
+    league = (
+        api.League.Bundesliga
+        if user_args["league"] == "bundesliga"
+        else api.League.Bundesliga_2
     )
 
-    fixture = bundesliga_fixture_extractor.extract_bundesliga_fixture_information(soup)
-    print(fixture_printer.styled_bundesliga_fixure(fixture))
+    fixture_entries = api.retrieve_all_fixtures(league=league)
+
+    matchday = user_args["fixture"]
+
+    # user did not provide a matchday -> get current
+    if matchday == -1:
+        matchday = api.retrieve_current_matchday(league)
+
+    print("Fetching data from the web ...\n")
+
+    fixture_printer.print_fixture_entries(fixture_entries[matchday - 1])

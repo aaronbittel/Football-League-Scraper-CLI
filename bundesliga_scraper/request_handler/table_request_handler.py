@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-from bundesliga_scraper import data_fetcher
-from bundesliga_scraper.config import LEAGUE_TABELS_BASE_URLS
-from bundesliga_scraper.data_extractors import (
-    bundesliga_table_extractor,
-)
 from bundesliga_scraper.data_printer import table_printer
+from bundesliga_scraper.api import api
 
 
 def handle_table_request(user_args: dict[str, str | int]) -> None:
@@ -16,15 +12,13 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
     Args:
         user_args (dict[str, str  |  int]): user arguments
     """
-    league = user_args["league"]
-    matchday = user_args["table"]
+    league = (
+        api.League.Bundesliga
+        if user_args["league"] == "bundesliga"
+        else api.League.Bundesliga_2
+    )
 
     print("Fetching data from web ...\n")
-    soup = data_fetcher.fetch_html(
-        f"{LEAGUE_TABELS_BASE_URLS[league.lower()]}{matchday}"
-    )
-    table_entries = bundesliga_table_extractor.extract_bundesliga_table_information(
-        soup
-    )
 
-    print(table_printer.styled_bundesliga_table_information(table_entries))
+    table_entries = api.retrieve_table(league=league, season=2023)
+    table_printer.print_table_entries(table_entries)
