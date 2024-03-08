@@ -3,6 +3,13 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum, auto
+
+
+class Result(Enum):
+    HOME_WON = auto()
+    AWAY_WON = auto()
+    DRAW = auto()
 
 
 @dataclass
@@ -41,10 +48,23 @@ class FixtureEntry:
             date=date,
         )
 
-    def _home_team_won(self) -> bool:
+    def home_team_won(self) -> bool:
         """Returns true if home team won.
 
         Returns:
             bool: true if home team won
         """
         return self.home_goals > self.away_goals
+
+    def away_team_won(self) -> bool:
+        return self.away_goals > self.home_goals
+
+    def get_result(self) -> Result:
+        if self.home_team_won():
+            return Result.HOME_WON
+        if self.away_team_won():
+            return Result.AWAY_WON
+        return Result.DRAW
+
+    def get_home_team(self) -> str:
+        return self.home_team

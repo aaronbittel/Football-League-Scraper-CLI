@@ -13,7 +13,7 @@ def handle_fixture_request(user_args: dict[str, str | int]) -> None:
     """
     league = (
         api.League.Bundesliga
-        if user_args["league"] == "bundesliga"
+        if user_args["league"].lower() == "bundesliga"
         else api.League.Bundesliga_2
     )
 
@@ -24,7 +24,5 @@ def handle_fixture_request(user_args: dict[str, str | int]) -> None:
     # user did not provide a matchday -> get current
     if matchday == -1:
         matchday = api.retrieve_current_matchday(league)
-
-    print("Fetching data from the web ...\n")
 
     fixture_printer.print_fixture_entries(fixture_entries[matchday - 1])

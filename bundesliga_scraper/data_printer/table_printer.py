@@ -4,6 +4,7 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 
 
 def print_table_entries(table_entries: list[TableEntry]) -> None:
+    print(f"{"Matches":>37}{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}")
     for placement, entry in enumerate(table_entries, start=1):
         print_table_entry(entry, placement=placement)
 
@@ -11,13 +12,13 @@ def print_table_entries(table_entries: list[TableEntry]) -> None:
 def print_table_entry(table_entry: TableEntry, placement: int):
     output = f"{placement:<4}"
     output += f"{table_entry.team_name:<30}"
-    output += f"{table_entry.matches:<4}"
-    output += f"{table_entry.won:<4}"
-    output += f"{table_entry.lost:<4}"
-    output += f"{table_entry.draw:<4}"
-    output += f"{table_entry.goals:>3}:{table_entry.opponent_goals:<4}"
-    output += f"{table_entry.goal_diff:<4}"
-    output += f"{table_entry.points:<4}"
+    output += f"{table_entry.matches:<6}"
+    output += f"{table_entry.won:<3}"
+    output += f"{table_entry.draw:<3}"
+    output += f"{table_entry.lost:<3}"
+    output += f"{table_entry.goals:>3}:{table_entry.opponent_goals:<5}"
+    output += f"{table_entry.goal_diff:<5}"
+    output += f"{table_entry.points:<5}"
     print(output)
 
 
