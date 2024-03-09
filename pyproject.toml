@@ -11,8 +11,7 @@ authors = [
 dependencies = [
   "argparse",
   "requests",
-  "beautifulsoup4",
-  "colorama",
+  "rich",
 ]
 
 [project.optional-dependencies]

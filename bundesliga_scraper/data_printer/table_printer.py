@@ -1,86 +1,66 @@
 """Creating colorful strings of matchday table information."""
 
+from rich.box import ROUNDED
+from rich.console import Console
+from rich.table import Table
+from rich.style import Style
+
+from bundesliga_scraper.api.api import League
 from bundesliga_scraper.datatypes.table_entry import TableEntry
 
+HEADER_STYLE = Style(bold=False)
+DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
+LEAGUE_NAMES = {League.Bundesliga: "Bundesliga", League.Bundesliga_2: "2. Bundesliga"}
 
-def print_table_entries(table_entries: list[TableEntry]) -> None:
-    print(f"{"Matches":>37}{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}")
+
+def print_table_entries(
+    league: League, matchday: int, table_entries: list[TableEntry]
+) -> None:
+    print()
+    table = create_table(league, matchday)
+    add_rows(table, table_entries)
+
+    console = Console()
+    console.print(table)
+
+
+def create_table(league: League, matchday: int) -> None:
+    table = Table(title=f"{LEAGUE_NAMES[league]} Matchday {matchday}", box=ROUNDED)
+
+    table.add_column("#", style="bold", header_style=HEADER_STYLE)
+    table.add_column("Team", header_style=HEADER_STYLE)
+    table.add_column("Matches", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("W", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("D", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("L", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("Goals", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("+/-", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column("Points", **DEFAULT_COLUMN_SETTINGS)
+
+    return table
+
+
+def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
     for placement, entry in enumerate(table_entries, start=1):
-        print_table_entry(entry, placement=placement)
+        goal_diff = determine_goal_diff_color(entry.goal_diff)
+        table.add_row(
+            str(placement),
+            str(entry.team_name),
+            str(entry.matches),
+            str(entry.won),
+            str(entry.draw),
+            str(entry.lost),
+            f"{entry.goals}:{entry.opponent_goals}",
+            goal_diff,
+            str(entry.points),
+        )
 
 
-def print_table_entry(table_entry: TableEntry, placement: int):
-    output = f"{placement:<4}"
-    output += f"{table_entry.team_name:<30}"
-    output += f"{table_entry.matches:<6}"
-    output += f"{table_entry.won:<3}"
-    output += f"{table_entry.draw:<3}"
-    output += f"{table_entry.lost:<3}"
-    output += f"{table_entry.goals:>3}:{table_entry.opponent_goals:<5}"
-    output += f"{table_entry.goal_diff:<5}"
-    output += f"{table_entry.points:<5}"
-    print(output)
-
-
-# def styled_bundesliga_table_information(table_entries: list[TableEntry]) -> str:
-#     """Returns a styled string reprensentation of a bundesliga matchday table.
-
-#     Args:
-#         table_entries (list[TableEntry]): Bundesliga teams' table information
-#     """
-#     styled_table_column_string = styled_table_columns()
-#     styled_table_entries_string = styled_table_entries(table_entries)
-#     return f"{styled_table_column_string}{styled_table_entries_string}"
-
-
-# def styled_table_columns() -> str:
-#     """Returns a styled string representation of the table columns."""
-#     styled_column_str = (
-#         f"{Back.LIGHTBLACK_EX + Fore.MAGENTA + Style.BRIGHT}{"Matches":>37}"
-#     )
-#     styled_column_str += f"{"W":>4}{"T":>3}{"D":>3}{"Goals":>8}{"+/-":>6}{"P":>4}"
-#     styled_column_str += f"{Style.RESET_ALL}"
-#     return styled_column_str + "\n"
-
-
-# def styled_table_entries(table_entries: list[TableEntry]) -> str:
-#     """Returns a styled matchday string representation."""
-#     return "\n".join(
-#         styled_table_entry(entry, placement)
-#         for placement, entry in enumerate(table_entries, start=1)
-#     )
-
-
-# def styled_table_entry(table_entry: TableEntry, placement: int) -> str:
-#     """Returns a styled entry of its values."""
-#     repr_str = f"{placement:<4}"
-#     repr_str += f"{table_entry.team_name:<30}{table_entry.games:^5}"
-#     repr_str += f"{table_entry.wins:^3}{table_entry.ties:^3}"
-#     repr_str += (
-#         f"{table_entry.defeats:^3}{table_entry.goals[0]:>4}:{table_entry.goals[1]:<4}"
-#     )
-#     repr_str += styled_diff_str(table_entry.diff)
-#     repr_str += (
-#         f"{Style.RESET_ALL}{Style.BRIGHT}{table_entry.points:^5}{Style.RESET_ALL}"
-#     )
-
-#     return repr_str
-
-
-# def styled_diff_str(diff: int) -> str:
-#     """Returns a styled diff string based on the number.
-
-#     Green if > 0, White == 0 and Red < 0
-
-#     Args:
-#         diff (int): difference goals scored and goals received
-#     """
-#     repr_str = ""
-#     if diff > 0:
-#         repr_str += f"{Fore.GREEN}"
-#     elif diff < 0:
-#         repr_str += f"{Fore.RED}"
-#     else:
-#         repr_str += f"{Fore.WHITE}"
-#     repr_str += f"{diff:+}".center(5)
-#     return repr_str + f"{Style.RESET_ALL}"
+def determine_goal_diff_color(goal_diff: int) -> str:
+    if goal_diff < 0:
+        colored_goal_diff = str(f"[red]{goal_diff}")
+    elif goal_diff > 0:
+        colored_goal_diff = str(f"[green]{goal_diff}")
+    else:
+        colored_goal_diff = str(f"[white]{goal_diff}")
+    return colored_goal_diff
