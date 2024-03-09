@@ -68,3 +68,6 @@ class FixtureEntry:
 
     def get_home_team(self) -> str:
         return self.home_team
+
+    def __str__(self) -> str:
+        return f"{self.home_team}${self.away_team}${self.home_goals}${self.away_goals}${self.matchday}${self.match_is_finished}${self.date}"

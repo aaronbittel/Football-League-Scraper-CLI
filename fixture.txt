@@ -1,0 +1,9 @@
+VfB Stuttgart$1. FC Union Berlin$2$0$25$True$2024-03-08 20:30:00
+FC Bayern München$1. FSV Mainz 05$0$0$25$False$2024-03-09 15:30:00
+RB Leipzig$SV Darmstadt 98$0$0$25$False$2024-03-09 15:30:00
+Borussia Mönchengladbach$1. FC Köln$0$0$25$False$2024-03-09 15:30:00
+FC Augsburg$1. FC Heidenheim 1846$0$0$25$False$2024-03-09 15:30:00
+Werder Bremen$Borussia Dortmund$0$0$25$False$2024-03-09 18:30:00
+VfL Bochum$SC Freiburg$0$0$25$False$2024-03-10 15:30:00
+Eintracht Frankfurt$TSG 1899 Hoffenheim$0$0$25$False$2024-03-10 17:30:00
+Bayer Leverkusen$VfL Wolfsburg$0$0$25$False$2024-03-10 19:30:00

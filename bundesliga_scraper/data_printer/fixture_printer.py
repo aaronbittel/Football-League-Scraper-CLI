@@ -15,6 +15,9 @@ def print_fixture_entry(fixture_entry: FixtureEntry) -> None:
 
 
 def print_fixture_entries(fixture_entries: list[FixtureEntry]) -> None:
+    with open("fixture.txt", "w", encoding="utf-8") as f:
+        for fixture in fixture_entries:
+            f.write(fixture.__str__() + "\n")
     current_date = datetime.today()
     for fixture in fixture_entries:
         date = fixture.date
