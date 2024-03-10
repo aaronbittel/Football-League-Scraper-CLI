@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bundesliga_scraper.datatypes.constants import League, MatchResult
 
@@ -18,13 +18,17 @@ class FixtureEntry:
     away_goals: int
     matchday: int
     match_is_finished: bool
+    match_is_live: bool
     date: datetime
 
     @classmethod
     def from_dict(cls, data: dict) -> FixtureEntry:
         home_team = data["team1"]["teamName"]
         away_team = data["team2"]["teamName"]
+        goals = data["goals"]
         match_is_finished = bool(data["matchIsFinished"])
+        match_is_live = False
+        match_results = data["matchResults"]
         date = datetime.strptime(data["matchDateTime"], r"%Y-%m-%dT%H:%M:%S")
         matchday = int(data["group"]["groupOrderID"])
 
@@ -37,6 +41,14 @@ class FixtureEntry:
             elif data["leagueShortcut"] == League.Bundesliga_2:
                 home_goals = int(data["matchResults"][0]["pointsTeam1"])
                 away_goals = int(data["matchResults"][0]["pointsTeam2"])
+        elif match_results:
+            match_is_live = True
+            home_goals, away_goals = 0, 0
+            for goal in goals:
+                if goal["scoreTeam1"] == 0:
+                    away_goals += 1
+                else:
+                    home_goals += 1
         else:
             home_goals, away_goals = 0, 0
 
@@ -47,6 +59,7 @@ class FixtureEntry:
             away_goals=away_goals,
             matchday=matchday,
             match_is_finished=match_is_finished,
+            match_is_live=match_is_live,
             date=date,
         )
 

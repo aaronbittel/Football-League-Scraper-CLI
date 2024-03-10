@@ -36,6 +36,23 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
         raise ValueError(f"matchday must be between 1 and 34. You gave {matchday}.")
 
     all_fixtures = api.retrieve_all_fixtures(league=league)
+
+    from pprint import pprint
+
+    i = 0
+    for matchday in enumerate(all_fixtures):
+        pprint(type(matchday))
+        for fixture in matchday:
+            pprint(type(fixture))
+            exit()
+            # if (
+            #     fixture["team1"]["shortName"] == "Bayern"
+            #     and fixture["team2"]["shortName"] == "Union"
+            # ):
+            #     print(i)
+            #     break
+            # i += 1
+
     fixtures_till_matchday = select_fixtures_till_matchday(
         all_fixtures, till_matchday=matchday - 1
     )
@@ -67,7 +84,7 @@ def calculate_table_entries(
         # the match day, then it will not be displayed in the table for the match day
         # This means that if games are canceled, games from the following match day
         # would be included and this will be prevented
-        if fixture.matchday > matchday or not fixture.match_is_finished:
+        if fixture.matchday > matchday:
             break
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)

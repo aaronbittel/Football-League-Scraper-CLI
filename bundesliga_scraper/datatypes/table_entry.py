@@ -44,28 +44,34 @@ class TableEntry:
             if match_result == MatchResult.HOME_WON:
                 self.points += 3
                 self.won += 1
-                self.history.insert(0, ResultSymbol.WIN.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.WIN.value)
             elif match_result == MatchResult.AWAY_WON:
                 self.lost += 1
-                self.history.insert(0, ResultSymbol.LOSE.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.LOSE.value)
             else:
                 self.points += 1
                 self.draw += 1
-                self.history.insert(0, ResultSymbol.DRAW.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.DRAW.value)
         else:
             self.goals += fixture.away_goals
             self.opponent_goals += fixture.home_goals
             if match_result == MatchResult.HOME_WON:
                 self.lost += 1
-                self.history.insert(0, ResultSymbol.LOSE.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.LOSE.value)
             elif match_result == MatchResult.AWAY_WON:
                 self.points += 3
                 self.won += 1
-                self.history.insert(0, ResultSymbol.WIN.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.WIN.value)
             else:
                 self.points += 1
                 self.draw += 1
-                self.history.insert(0, ResultSymbol.DRAW.value)
+                if not fixture.match_is_live:
+                    self.history.insert(0, ResultSymbol.DRAW.value)
 
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals

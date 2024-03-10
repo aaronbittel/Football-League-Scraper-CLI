@@ -13,7 +13,7 @@ MAX_WIDTH = 67
 
 def get_fixture_string(fixture: FixtureEntry):
     # TODO Check if game is live and display its live score
-    if fixture.match_is_finished:
+    if fixture.match_is_finished or fixture.match_is_live:
         return f"{fixture.home_team:>30}{fixture.home_goals:>3}:{fixture.away_goals:<3}{fixture.away_team}\n"
     else:
         return f"{fixture.home_team:>30} - : - {fixture.away_team}\n"
@@ -32,6 +32,10 @@ def print_fixture_entries(fixture_entries: list[FixtureEntry]) -> None:
             ):
                 output += fixture.date.strftime(r"%H:%M") + "\n"
                 current_time = fixture.date
+                if fixture.match_is_live:
+                    output = output[:-1]
+                    # output += " " * 50 + "[blink]🔴 LIVE[/blink]\n"
+                    output += " " * 50 + "🔴 LIVE\n"
             output += get_fixture_string(fixture)
         output = output[:-1]
         Console().print(
