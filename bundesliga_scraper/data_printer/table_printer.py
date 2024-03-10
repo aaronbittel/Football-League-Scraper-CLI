@@ -14,11 +14,11 @@ LEAGUE_NAMES = {League.Bundesliga: "Bundesliga", League.Bundesliga_2: "2. Bundes
 
 
 def print_table_entries(
-    league: League, matchday: int, table_entries: list[TableEntry]
+    league: League, matchday: int, table_list: list[TableEntry]
 ) -> None:
     print()
     table = create_table(league, matchday)
-    add_rows(table, table_entries)
+    add_rows(table, table_list)
 
     console = Console()
     console.print(table)
@@ -50,7 +50,7 @@ def create_table(league: League, matchday: int) -> None:
 def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
     for placement, entry in enumerate(table_entries, start=1):
         goal_diff = determine_goal_diff_color(entry.goal_diff)
-        placement = determine_placement_string(placement)
+        placement = determine_placement_string(placement, entry.direction)
         table.add_row(
             str(placement),
             str(entry.team_name),
@@ -75,19 +75,13 @@ def determine_goal_diff_color(goal_diff: int) -> str:
     return colored_goal_diff
 
 
-def determine_placement_string(placement: int) -> str:
-    # if 1 <= placement <= 4:
-    #     return f"[green]{placement}"
-    # elif placement == 5:
-    #     return f"[blue]{placement}"
-    # elif placement == 6:
-    #     return f"[cyan]{placement}"
-    # elif placement == 16:
-    #     return f"[orange3]{placement}"
-    # elif 17 <= placement <= 18:
-    #     return f"[red]{placement}"
-    if placement == 1:
-        return f"{placement}  🔺"
-    if placement == 7:
-        return f"{placement}  [red]v"
+def determine_placement_string(placement: int, direction: int) -> str:
+    if direction == 1:
+        if placement <= 9:
+            return f"{placement}  🔺"
+        return f"{placement} 🔺"
+    if direction == -1:
+        if placement <= 9:
+            return f"{placement}  🔻"
+        return f"{placement} 🔻"
     return str(placement)

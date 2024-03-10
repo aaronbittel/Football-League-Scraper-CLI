@@ -37,10 +37,23 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
 
     all_fixtures = api.retrieve_all_fixtures(league=league)
 
-    table_entries = calculate_table_entries(all_fixtures, matchday=matchday)
-    table_entries.sort(reverse=True)
+    table_list_prior_matchday = calculate_table_entries(
+        all_fixtures, matchday=matchday - 1
+    )
+
+    table_list = calculate_table_entries(all_fixtures, matchday=matchday)
+
+    for pl, entry in enumerate(table_list):
+        old_pl = index_of(entry=entry, table_list=table_list_prior_matchday)
+        if pl == old_pl:
+            continue
+        elif pl > old_pl:
+            entry.direction = -1
+        else:
+            entry.direction = 1
+
     table_printer.print_table_entries(
-        league=league, matchday=matchday, table_entries=table_entries
+        league=league, matchday=matchday, table_list=table_list
     )
 
 
@@ -67,4 +80,12 @@ def calculate_table_entries(
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)
 
-    return list(table_entries.values())
+    table_list = list(table_entries.values())
+    table_list.sort(reverse=True)
+    return table_list
+
+
+def index_of(entry: TableEntry, table_list: list[TableEntry]) -> int:
+    for i, table_entry in enumerate(table_list):
+        if table_entry.team_name == entry.team_name:
+            return i

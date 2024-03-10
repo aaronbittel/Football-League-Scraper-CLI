@@ -19,6 +19,7 @@ class TableEntry:
     lost: int = 0
     draw: int = 0
     goal_diff: int = 0
+    direction: int = 0
     history: list[str] = field(default_factory=list)
 
     @classmethod
