@@ -22,15 +22,11 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
     )
     matchday = user_args["table"]
 
-    current_matchday = api.retrieve_current_matchday(league=league) - 1
+    current_matchday = api.retrieve_current_matchday(league=league)
 
     # -1 == get current one
-    if matchday == -1 or matchday >= current_matchday:
-        table_entries = api.retrieve_table(league=league)
-        table_printer.print_table_entries(
-            league=league, matchday=current_matchday, table_entries=table_entries
-        )
-        return
+    if matchday == -1:
+        matchday = current_matchday
 
     # need to calculate the table for the given matchday by myself
     # get all fixtures -> calculate till matchday
@@ -71,7 +67,7 @@ def calculate_table_entries(
         # the match day, then it will not be displayed in the table for the match day
         # This means that if games are canceled, games from the following match day
         # would be included and this will be prevented
-        if fixture.matchday > matchday:
+        if fixture.matchday > matchday or not fixture.match_is_finished:
             break
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)

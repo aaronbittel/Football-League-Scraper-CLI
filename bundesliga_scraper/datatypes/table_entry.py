@@ -1,8 +1,11 @@
 """Module that represents a table entry."""
 
 from __future__ import annotations
-from dataclasses import dataclass
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry, Result
+
+from dataclasses import dataclass, field
+
+from bundesliga_scraper.datatypes.constants import MatchResult, ResultSymbol
+from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 
 @dataclass
@@ -16,6 +19,7 @@ class TableEntry:
     lost: int = 0
     draw: int = 0
     goal_diff: int = 0
+    history: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: dict[str, str | int]) -> TableEntry:
@@ -32,30 +36,36 @@ class TableEntry:
         )
 
     def update(self, fixture: FixtureEntry) -> None:
-        match_result: Result = fixture.get_result()
+        match_result: MatchResult = fixture.get_result()
 
         if self.team_name == fixture.get_home_team():
             self.goals += fixture.home_goals
             self.opponent_goals += fixture.away_goals
-            if match_result == Result.HOME_WON:
+            if match_result == MatchResult.HOME_WON:
                 self.points += 3
                 self.won += 1
-            elif match_result == Result.AWAY_WON:
+                self.history.insert(0, ResultSymbol.WIN.value)
+            elif match_result == MatchResult.AWAY_WON:
                 self.lost += 1
+                self.history.insert(0, ResultSymbol.LOSE.value)
             else:
                 self.points += 1
                 self.draw += 1
+                self.history.insert(0, ResultSymbol.DRAW.value)
         else:
             self.goals += fixture.away_goals
             self.opponent_goals += fixture.home_goals
-            if match_result == Result.HOME_WON:
+            if match_result == MatchResult.HOME_WON:
                 self.lost += 1
-            elif match_result == Result.AWAY_WON:
+                self.history.insert(0, ResultSymbol.LOSE.value)
+            elif match_result == MatchResult.AWAY_WON:
                 self.points += 3
                 self.won += 1
+                self.history.insert(0, ResultSymbol.WIN.value)
             else:
                 self.points += 1
                 self.draw += 1
+                self.history.insert(0, ResultSymbol.DRAW.value)
 
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals

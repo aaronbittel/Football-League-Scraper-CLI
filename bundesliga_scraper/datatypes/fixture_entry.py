@@ -1,15 +1,11 @@
 """Module that represents a Fixture entry."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum, auto
 
-
-class Result(Enum):
-    HOME_WON = auto()
-    AWAY_WON = auto()
-    DRAW = auto()
+from bundesliga_scraper.datatypes.constants import League, MatchResult
 
 
 @dataclass
@@ -33,8 +29,14 @@ class FixtureEntry:
         matchday = int(data["group"]["groupOrderID"])
 
         if match_is_finished:
-            home_goals = int(data["matchResults"][1]["pointsTeam1"])
-            away_goals = int(data["matchResults"][1]["pointsTeam2"])
+            # in Bundesliga matchResults[1] is end of game result
+            if data["leagueShortcut"] == League.Bundesliga:
+                home_goals = int(data["matchResults"][1]["pointsTeam1"])
+                away_goals = int(data["matchResults"][1]["pointsTeam2"])
+            # in 2. Bundesliga matchResults[0] is end of game results
+            elif data["leagueShortcut"] == League.Bundesliga_2:
+                home_goals = int(data["matchResults"][0]["pointsTeam1"])
+                away_goals = int(data["matchResults"][0]["pointsTeam2"])
         else:
             home_goals, away_goals = 0, 0
 
@@ -59,12 +61,12 @@ class FixtureEntry:
     def away_team_won(self) -> bool:
         return self.away_goals > self.home_goals
 
-    def get_result(self) -> Result:
+    def get_result(self) -> MatchResult:
         if self.home_team_won():
-            return Result.HOME_WON
+            return MatchResult.HOME_WON
         if self.away_team_won():
-            return Result.AWAY_WON
-        return Result.DRAW
+            return MatchResult.AWAY_WON
+        return MatchResult.DRAW
 
     def get_home_team(self) -> str:
         return self.home_team

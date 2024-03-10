@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-from enum import StrEnum
-from bundesliga_scraper.datatypes.table_entry import TableEntry
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
-import requests
 from datetime import datetime
 
+import requests
+
+from bundesliga_scraper.datatypes.constants import League
+from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from bundesliga_scraper.datatypes.table_entry import TableEntry
+
 BASE_URL = "https://api.openligadb.de"
-
-
-class League(StrEnum):
-    Bundesliga = "bl1"
-    Bundesliga_2 = "bl2"
 
 
 def get_table(league: League, season: int = 2023) -> dict:

@@ -25,7 +25,11 @@ def print_table_entries(
 
 
 def create_table(league: League, matchday: int) -> None:
-    table = Table(title=f"{LEAGUE_NAMES[league]} Matchday {matchday}", box=ROUNDED)
+    table = Table(
+        title=f"{LEAGUE_NAMES[league]} Matchday {matchday}",
+        box=ROUNDED,
+        show_lines=True,
+    )
 
     table.add_column("#", style="bold", header_style=HEADER_STYLE)
     table.add_column("Team", header_style=HEADER_STYLE)
@@ -38,6 +42,7 @@ def create_table(league: League, matchday: int) -> None:
     table.add_column(
         "Points", justify="center", header_style=HEADER_STYLE, style=Style(bold=True)
     )
+    table.add_column("Last 5", **DEFAULT_COLUMN_SETTINGS)
 
     return table
 
@@ -55,6 +60,7 @@ def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
             f"{entry.goals}:{entry.opponent_goals}",
             goal_diff,
             str(entry.points),
+            "".join(entry.history[:5]),
         )
 
 
