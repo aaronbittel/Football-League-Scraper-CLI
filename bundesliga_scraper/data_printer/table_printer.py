@@ -35,7 +35,9 @@ def create_table(league: League, matchday: int) -> None:
     table.add_column("L", **DEFAULT_COLUMN_SETTINGS)
     table.add_column("Goals", **DEFAULT_COLUMN_SETTINGS)
     table.add_column("+/-", **DEFAULT_COLUMN_SETTINGS)
-    table.add_column("Points", **DEFAULT_COLUMN_SETTINGS)
+    table.add_column(
+        "Points", justify="center", header_style=HEADER_STYLE, style=Style(bold=True)
+    )
 
     return table
 

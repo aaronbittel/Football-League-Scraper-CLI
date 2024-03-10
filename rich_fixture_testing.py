@@ -1,7 +1,10 @@
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from collections import defaultdict
 from datetime import datetime
-from rich.panel import Panel
+
 from rich.console import Console
+from rich.panel import Panel
+
+from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 fixture_entries: list[FixtureEntry] = []
 with open("fixture.txt", "r", encoding="utf-8") as f:
@@ -20,8 +23,8 @@ with open("fixture.txt", "r", encoding="utf-8") as f:
             )
         )
 
-output = ""
-current_date = datetime.today()
+# output = ""
+# current_date = datetime.today()
 
 
 def get_fixture_string(fixture):
@@ -31,51 +34,77 @@ def get_fixture_string(fixture):
         return f"{fixture.home_team:>30} - : - {fixture.away_team}\n"
 
 
+# for fixture in fixture_entries:
+#     date = fixture.date
+#     if date != current_date:
+#         current_date = date
+#         output += "\n" + date.strftime(r"%Y-%m-%d %H:%M:%S") + "\n"
+#     get_fixture_string(fixture)
+# else:
+#     output = output[1:-1]
+# Console().print(Panel(renderable=output, title="Fixture Matchday 24", expand=False))
+
+
+# def get_max_width(entries):
+#     # Example logic, replace with your actual calculation
+#     max_width = 0
+#     for entry in entries:
+#         current_width = len(get_fixture_string(entry))
+#         max_width = max(max_width, current_width)
+#     return max_width + 20
+
+
+# max_width = get_max_width(fixture_entries)
+max_width = 67
+matchday_split = defaultdict(list)
+
 for fixture in fixture_entries:
-    date = fixture.date
-    if date != current_date:
-        current_date = date
-        output += "\n" + date.strftime(r"%Y-%m-%d %H:%M:%S") + "\n"
-    get_fixture_string(fixture)
-else:
-    output = output[1:-1]
-Console().print(Panel(renderable=output, title="Fixture Matchday 24", expand=False))
+    matchday_split[fixture.date.strftime(r"%d.%m.%Y, %A")].append(fixture)
 
-
-def get_max_width(entries):
-    # Example logic, replace with your actual calculation
-    max_width = 0
-    for entry in entries:
-        current_width = len(get_fixture_string(entry))
-        max_width = max(max_width, current_width)
-    return max_width + 20
-
-
-max_width = get_max_width(fixture_entries)
-print(max_width)
-
-output = f"{fixture_entries[0].date.hour}:{fixture_entries[0].date.minute}\n"
-output += get_fixture_string(fixture_entries[0])
-output = output[:-1]
-Console().print(
-    Panel(
-        renderable=output,
-        # expand=False,
-        title=fixture_entries[0].date.strftime("%d.%m.%Y, %A"),
-        width=max_width,
+for date, fixture_list in matchday_split.items():
+    output = ""
+    current_time = datetime.today()
+    for fixture in fixture_list:
+        if not (
+            current_time.hour == fixture.date.hour
+            and current_time.minute == fixture.date.minute
+        ):
+            output += fixture.date.strftime(r"%H:%M") + "\n"
+            current_time = fixture.date
+        output += get_fixture_string(fixture)
+    output = output[:-1]
+    Console().print(
+        Panel(
+            renderable=output,
+            title=date,
+            width=max_width,
+            padding=1,
+        )
     )
-)
 
-output = f"{fixture_entries[1].date.hour}:{fixture_entries[1].date.minute}\n"
-output += "".join(get_fixture_string(fixture) for fixture in fixture_entries[1:5])
-output += f"\n{fixture_entries[5].date.hour}:{fixture_entries[5].date.minute}\n"
-output += "".join(get_fixture_string(fixture) for fixture in fixture_entries[5:6])
-output = output[:-1]
-Console().print(
-    Panel(
-        renderable=output,
-        # expand=False,
-        title=fixture_entries[1].date.strftime("%d.%m.%Y, %A"),
-        width=max_width,
-    )
-)
+
+# output = f"{fixture_entries[0].date.hour}:{fixture_entries[0].date.minute}\n"
+# output += get_fixture_string(fixture_entries[0])
+# output = output[:-1]
+# Console().print(
+#     Panel(
+#         renderable=output,
+#         # expand=False,
+#         title=fixture_entries[0].date.strftime("%d.%m.%Y, %A"),
+#         width=max_width,
+#     )
+# )
+
+# output = f"{fixture_entries[1].date.hour}:{fixture_entries[1].date.minute}\n"
+# output += "".join(get_fixture_string(fixture) for fixture in fixture_entries[1:5])
+# output += f"\n{fixture_entries[5].date.hour}:{fixture_entries[5].date.minute}\n"
+# output += "".join(get_fixture_string(fixture) for fixture in fixture_entries[5:6])
+# output = output[:-1]
+# Console().print(
+#     Panel(
+#         renderable=output,
+#         # expand=False,
+#         title=fixture_entries[1].date.strftime("%d.%m.%Y, %A"),
+#         width=max_width,
+#     )
+# )
