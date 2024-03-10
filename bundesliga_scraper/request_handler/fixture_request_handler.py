@@ -1,8 +1,10 @@
 """Handles requests for Football fixtures."""
 
 from __future__ import annotations
+
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
+from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 
 def handle_fixture_request(user_args: dict[str, str | int]) -> None:
@@ -25,4 +27,13 @@ def handle_fixture_request(user_args: dict[str, str | int]) -> None:
     if matchday == -1:
         matchday = api.retrieve_current_matchday(league)
 
-    fixture_printer.print_fixture_entries(fixture_entries[matchday - 1])
+    total = 0
+    matchday_fixtures: list[FixtureEntry] = []
+    for fixture in fixture_entries:
+        if fixture.matchday == matchday:
+            matchday_fixtures.append(fixture)
+            total += 1
+            if total == 9:
+                break
+
+    fixture_printer.print_fixture_entries(matchday_fixtures)

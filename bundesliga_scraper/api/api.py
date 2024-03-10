@@ -27,18 +27,10 @@ def retrieve_table(league: League, season: int = 2023) -> list[TableEntry]:
     return [TableEntry.from_dict(table_entry) for table_entry in data]
 
 
-def retrieve_all_fixtures(
-    league: League, season: int = 2023
-) -> list[list[FixtureEntry]]:
+def retrieve_all_fixtures(league: League, season: int = 2023) -> list[FixtureEntry]:
     all_fixtures_list = get_match_data(league=league, season=season)
-    all_fixtures = []
-    for i in range(34):
-        matchday = all_fixtures_list[i * 9 : (i * 9) + 9]
-        matchday_fixtures = []
-        for fixture in matchday:
-            matchday_fixtures.append(FixtureEntry.from_dict(fixture))
-        all_fixtures.append(matchday_fixtures)
-    return all_fixtures
+
+    return [FixtureEntry.from_dict(fixture_data) for fixture_data in all_fixtures_list]
 
 
 def get_match_data(league: League, season: int = 2023) -> dict:

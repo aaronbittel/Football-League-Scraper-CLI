@@ -87,7 +87,7 @@ def determine_placement_string(placement: int) -> str:
     # elif 17 <= placement <= 18:
     #     return f"[red]{placement}"
     if placement == 1:
-        return f"{placement}  [green]^"
+        return f"{placement}  🔺"
     if placement == 7:
-        return f"{placement}  🔻"
+        return f"{placement}  [red]v"
     return str(placement)

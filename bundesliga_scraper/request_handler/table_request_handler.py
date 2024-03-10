@@ -37,37 +37,11 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
 
     all_fixtures = api.retrieve_all_fixtures(league=league)
 
-    from pprint import pprint
-
-    i = 0
-    for matchday in enumerate(all_fixtures):
-        pprint(type(matchday))
-        for fixture in matchday:
-            pprint(type(fixture))
-            exit()
-            # if (
-            #     fixture["team1"]["shortName"] == "Bayern"
-            #     and fixture["team2"]["shortName"] == "Union"
-            # ):
-            #     print(i)
-            #     break
-            # i += 1
-
-    fixtures_till_matchday = select_fixtures_till_matchday(
-        all_fixtures, till_matchday=matchday - 1
-    )
-
-    table_entries = calculate_table_entries(fixtures_till_matchday, matchday=matchday)
+    table_entries = calculate_table_entries(all_fixtures, matchday=matchday)
     table_entries.sort(reverse=True)
     table_printer.print_table_entries(
         league=league, matchday=matchday, table_entries=table_entries
     )
-
-
-def select_fixtures_till_matchday(
-    all_fixtures: list[list[FixtureEntry]], till_matchday: int
-) -> list[FixtureEntry]:
-    return list(chain.from_iterable(all_fixtures[: till_matchday + 1]))
 
 
 def calculate_table_entries(
@@ -86,6 +60,10 @@ def calculate_table_entries(
         # would be included and this will be prevented
         if fixture.matchday > matchday:
             break
+
+        if not fixture.match_is_finished and not fixture.match_is_live:
+            break
+
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)
 

@@ -41,7 +41,9 @@ class FixtureEntry:
             elif data["leagueShortcut"] == League.Bundesliga_2:
                 home_goals = int(data["matchResults"][0]["pointsTeam1"])
                 away_goals = int(data["matchResults"][0]["pointsTeam2"])
-        elif match_results:
+        elif match_results or timedelta(hours=0) < datetime.now() - date < timedelta(
+            hours=1
+        ):
             match_is_live = True
             home_goals, away_goals = 0, 0
             for goal in goals:

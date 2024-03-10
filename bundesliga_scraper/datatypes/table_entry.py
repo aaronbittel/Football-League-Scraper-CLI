@@ -42,39 +42,40 @@ class TableEntry:
             self.goals += fixture.home_goals
             self.opponent_goals += fixture.away_goals
             if match_result == MatchResult.HOME_WON:
-                self.points += 3
-                self.won += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.WIN.value)
+                self.update_after_win(fixture.match_is_live)
             elif match_result == MatchResult.AWAY_WON:
-                self.lost += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.LOSE.value)
+                self.update_after_lose(fixture.match_is_live)
             else:
-                self.points += 1
-                self.draw += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.DRAW.value)
+                self.update_after_draw(fixture.match_is_live)
         else:
             self.goals += fixture.away_goals
             self.opponent_goals += fixture.home_goals
             if match_result == MatchResult.HOME_WON:
-                self.lost += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.LOSE.value)
+                self.update_after_lose(fixture.match_is_live)
             elif match_result == MatchResult.AWAY_WON:
-                self.points += 3
-                self.won += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.WIN.value)
+                self.update_after_win(fixture.match_is_live)
             else:
-                self.points += 1
-                self.draw += 1
-                if not fixture.match_is_live:
-                    self.history.insert(0, ResultSymbol.DRAW.value)
+                self.update_after_draw(fixture.match_is_live)
 
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals
+
+    def update_after_draw(self, is_live: bool) -> None:
+        self.points += 1
+        self.draw += 1
+        if not is_live:
+            self.history.insert(0, ResultSymbol.DRAW.value)
+
+    def update_after_lose(self, is_live: bool) -> None:
+        self.lost += 1
+        if not is_live:
+            self.history.insert(0, ResultSymbol.LOSE.value)
+
+    def update_after_win(self, is_live: bool) -> None:
+        self.points += 3
+        self.won += 1
+        if not is_live:
+            self.history.insert(0, ResultSymbol.WIN.value)
 
     def __lt__(self, other: TableEntry) -> bool:
         if self.points < other.points:
