@@ -16,6 +16,8 @@ FLAGS = [
     "--help",
     "--first-round-table",
     "-frt",
+    "--second-round-table",
+    "-srt",
 ]
 
 LEAGUE_ABBR = {"bundesliga": "BL", "2_bundesliga": "2BL"}
@@ -74,6 +76,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Displaying the table after the first round.",
     )
 
+    parser.add_argument(
+        "-srt",
+        "--second-round-table",
+        action="store_true",
+        dest="second_round",
+        help="Displaying the table after the second round.",
+    )
+
     return parser
 
 
@@ -85,7 +95,9 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
     """
     args = parser.parse_args()
 
-    if not any((args.table, args.fixture, args.session, args.first_round)):
+    if not any(
+        (args.table, args.fixture, args.session, args.first_round, args.second_round)
+    ):
         parser.print_help()
 
     request_handler.handle_args(vars(args))  # convert Namespace to dictionary

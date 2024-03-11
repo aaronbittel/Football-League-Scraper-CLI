@@ -24,3 +24,6 @@ def handle_args(user_args: dict[str, str | int]) -> None:
 
     if user_args["first_round"]:
         handle_table_request(user_args)
+
+    if user_args["second_round"]:
+        handle_table_request(user_args)

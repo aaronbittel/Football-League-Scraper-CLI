@@ -30,6 +30,11 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
             handle_table(league=league, matchday=-1, current_matchday=current_matchday)
         else:
             handle_first_round(league)
+    elif user_args["second_round"]:
+        if current_matchday <= FIRST_ROUND_MATCHDAY:
+            handle_table(league=league, matchday=-1, current_matchday=current_matchday)
+        else:
+            handle_second_round(league, current_matchday)
     else:
         matchday = user_args["table"]
         handle_table(
@@ -51,11 +56,12 @@ def handle_table(league: League, matchday: int, current_matchday: int) -> None:
 
     all_fixtures = api.retrieve_all_fixtures(league=league)
 
-    table_list_prior_matchday = calculate_table_entries(
-        all_fixtures, matchday=matchday - 1
-    )
+    selected_fixtures = select_fixtures(all_fixtures=all_fixtures, to=matchday - 1)
 
-    table_list = calculate_table_entries(all_fixtures, matchday=matchday)
+    table_list_prior_matchday = calculate_table_entries(selected_fixtures)
+
+    selected_fixtures = select_fixtures(all_fixtures=all_fixtures, to=matchday)
+    table_list = calculate_table_entries(selected_fixtures)
 
     for pl, entry in enumerate(table_list):
         old_pl = index_of(entry=entry, table_list=table_list_prior_matchday)
@@ -81,39 +87,64 @@ def initialize_empty_table_entries_dict(
     return table_entries
 
 
-def handle_first_round(league: League) -> None:
-    total_games = FIRST_ROUND_MATCHDAY * 9
-    all_fixtures = api.retrieve_all_fixtures(league=league)
-    table_entries = initialize_empty_table_entries_dict(all_fixtures)
+def select_fixtures(
+    all_fixtures: list[FixtureEntry],
+    to: int,
+    from_: int = 1,
+    include_postponed_matches: bool = False,
+) -> list[FixtureEntry]:
+    selected_fixtures = []
     for fixture in all_fixtures:
-        if game_is_in_future(fixture, matchday=FIRST_ROUND_MATCHDAY):
+        if fixture.matchday < from_:
             continue
-        table_entries[fixture.home_team].update(fixture)
-        table_entries[fixture.away_team].update(fixture)
-        total_games -= 1
-        if total_games == 0:
+        if fixture.matchday > to:
+            if include_postponed_matches and len(selected_fixtures) != 9 * (
+                to - from_ + 1
+            ):
+                continue
             break
-    table_list = list(table_entries.values())
-    table_list.sort(reverse=True)
+        selected_fixtures.append(fixture)
+    return selected_fixtures
+
+
+def handle_first_round(league: League) -> None:
+    all_fixtures = api.retrieve_all_fixtures(league=league)
+
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        to=FIRST_ROUND_MATCHDAY,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(fixtures=selected_fixtures)
+
     table_printer.print_table_entries(
         league=league, matchday=FIRST_ROUND_MATCHDAY, table_list=table_list
     )
 
 
-def calculate_table_entries(
-    fixtures: list[FixtureEntry], matchday: int
-) -> list[TableEntry]:
+def handle_second_round(league: League, current_matchday: int) -> None:
+    all_fixtures = api.retrieve_all_fixtures(league=league)
+
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        from_=FIRST_ROUND_MATCHDAY,
+        to=current_matchday,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(fixtures=selected_fixtures)
+
+    table_printer.print_table_entries(
+        league=league, matchday=FIRST_ROUND_MATCHDAY, table_list=table_list
+    )
+
+
+def calculate_table_entries(fixtures: list[FixtureEntry]) -> list[TableEntry]:
     # TODO Somehow use Defaultdict
     table_entries = initialize_empty_table_entries_dict(fixtures)
 
     for fixture in fixtures:
-        # Based on Kicker.de, if a match has been postponed and was not played on
-        # the match day, then it will not be displayed in the table for the match day
-        # This means that if games are canceled, games from the following match day
-        # would be included and this will be prevented
-        if game_is_in_future(fixture, matchday):
-            break
-
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)
 
