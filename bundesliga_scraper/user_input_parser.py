@@ -7,7 +7,16 @@ import sys
 
 from bundesliga_scraper.request_handler import request_handler
 
-FLAGS = ["--table", "--fixture", "-s", "--start-session", "-h", "--help"]
+FLAGS = [
+    "--table",
+    "--fixture",
+    "-s",
+    "--start-session",
+    "-h",
+    "--help",
+    "--first-round-table",
+    "-frt",
+]
 
 LEAGUE_ABBR = {"bundesliga": "BL", "2_bundesliga": "2BL"}
 
@@ -57,6 +66,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Starts a session for the given league -> league is now default",
     )
 
+    parser.add_argument(
+        "-frt",
+        "--first-round-table",
+        action="store_true",
+        dest="first_round",
+        help="Displaying the table after the first round.",
+    )
+
     return parser
 
 
@@ -68,7 +85,7 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
     """
     args = parser.parse_args()
 
-    if not any((args.table, args.fixture, args.session)):
+    if not any((args.table, args.fixture, args.session, args.first_round)):
         parser.print_help()
 
     request_handler.handle_args(vars(args))  # convert Namespace to dictionary

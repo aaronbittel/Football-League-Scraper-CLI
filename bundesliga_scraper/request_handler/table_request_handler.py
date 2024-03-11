@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from bundesliga_scraper.api import api
+from bundesliga_scraper.data_printer import table_printer
+from bundesliga_scraper.datatypes.constants import League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 from bundesliga_scraper.datatypes.table_entry import TableEntry
-from bundesliga_scraper.data_printer import table_printer
-from bundesliga_scraper.api import api
-from itertools import chain
+
+
+FIRST_ROUND_MATCHDAY = 17
 
 
 def handle_table_request(user_args: dict[str, str | int]) -> None:
@@ -20,10 +23,21 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
         if user_args["league"].lower() == "bundesliga"
         else api.League.Bundesliga_2
     )
-    matchday = user_args["table"]
 
     current_matchday = api.retrieve_current_matchday(league=league)
+    if user_args["first_round"]:
+        if current_matchday <= FIRST_ROUND_MATCHDAY:
+            handle_table(league=league, matchday=-1, current_matchday=current_matchday)
+        else:
+            handle_first_round(league)
+    else:
+        matchday = user_args["table"]
+        handle_table(
+            league=league, matchday=matchday, current_matchday=current_matchday
+        )
 
+
+def handle_table(league: League, matchday: int, current_matchday: int) -> None:
     # -1 == get current one
     if matchday == -1:
         matchday = current_matchday
@@ -57,35 +71,65 @@ def handle_table_request(user_args: dict[str, str | int]) -> None:
     )
 
 
-def calculate_table_entries(
-    fixtures: list[FixtureEntry], matchday: int
-) -> list[TableEntry]:
-    # TODO Somehow use Defaultdict
+def initialize_empty_table_entries_dict(
+    fixtures: list[FixtureEntry],
+) -> dict[str, TableEntry]:
     table_entries = {}
     for fixture in fixtures[0:9]:
         table_entries[fixture.home_team] = TableEntry(team_name=fixture.home_team)
         table_entries[fixture.away_team] = TableEntry(team_name=fixture.away_team)
+    return table_entries
+
+
+def handle_first_round(league: League) -> None:
+    total_games = FIRST_ROUND_MATCHDAY * 9
+    all_fixtures = api.retrieve_all_fixtures(league=league)
+    table_entries = initialize_empty_table_entries_dict(all_fixtures)
+    for fixture in all_fixtures:
+        if game_is_in_future(fixture, matchday=FIRST_ROUND_MATCHDAY):
+            continue
+        table_entries[fixture.home_team].update(fixture)
+        table_entries[fixture.away_team].update(fixture)
+        total_games -= 1
+        if total_games == 0:
+            break
+    table_list = list(table_entries.values())
+    table_list.sort(reverse=True)
+    table_printer.print_table_entries(
+        league=league, matchday=FIRST_ROUND_MATCHDAY, table_list=table_list
+    )
+
+
+def calculate_table_entries(
+    fixtures: list[FixtureEntry], matchday: int
+) -> list[TableEntry]:
+    # TODO Somehow use Defaultdict
+    table_entries = initialize_empty_table_entries_dict(fixtures)
 
     for fixture in fixtures:
         # Based on Kicker.de, if a match has been postponed and was not played on
         # the match day, then it will not be displayed in the table for the match day
         # This means that if games are canceled, games from the following match day
         # would be included and this will be prevented
-        if fixture.matchday > matchday:
-            break
-
-        if not fixture.match_is_finished and not fixture.match_is_live:
+        if game_is_in_future(fixture, matchday):
             break
 
         table_entries[fixture.home_team].update(fixture)
         table_entries[fixture.away_team].update(fixture)
 
     table_list = list(table_entries.values())
-    table_list.sort(reverse=True)
-    return table_list
+    return sorted(table_list, reverse=True)
 
 
 def index_of(entry: TableEntry, table_list: list[TableEntry]) -> int:
     for i, table_entry in enumerate(table_list):
         if table_entry.team_name == entry.team_name:
             return i
+
+
+def game_is_in_future(fixture: FixtureEntry, matchday: int) -> bool:
+    return (
+        fixture.matchday > matchday
+        or not fixture.match_is_finished
+        and not fixture.match_is_live
+    )
