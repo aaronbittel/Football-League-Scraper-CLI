@@ -66,6 +66,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Displaying the table after the second round.",
     )
 
+    table_parser.add_argument(
+        "-l",
+        "--last",
+        dest="last",
+        type=int,
+        help="Calculates the last {n} matchdays and displays it.",
+    )
+
     table_parser.set_defaults(func=handle_table_request)
 
     fixture_parser = subparsers.add_parser("fixture", help="fixture help")

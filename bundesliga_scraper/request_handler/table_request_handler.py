@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import table_printer
-from bundesliga_scraper.datatypes.constants import League
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 from bundesliga_scraper.datatypes.table_entry import TableEntry
-
 
 FIRST_ROUND_MATCHDAY = 17
 
@@ -36,11 +35,17 @@ def handle_table_request(args: dict[str, str | int]) -> None:
             handle_table(league=league, matchday=-1, current_matchday=current_matchday)
         else:
             handle_second_round(league, current_matchday)
+    elif args.last:
+        handle_table_last(league, args.last, current_matchday)
     else:
         matchday = args.matchday
         handle_table(
             league=league, matchday=matchday, current_matchday=current_matchday
         )
+
+
+def standard_title(league: League, matchday: int) -> str:
+    return f"{LEAGUE_NAMES[league]} Matchday {matchday}"
 
 
 def handle_table(league: League, matchday: int, current_matchday: int) -> None:
@@ -74,7 +79,27 @@ def handle_table(league: League, matchday: int, current_matchday: int) -> None:
             entry.direction = 1
 
     table_printer.print_table_entries(
-        league=league, matchday=matchday, table_list=table_list
+        title=standard_title(league=league, matchday=matchday), table_list=table_list
+    )
+
+
+def handle_table_last(league: League, n: int, current_matchday: int) -> None:
+    from_matchday = current_matchday - n + 1
+    if from_matchday < 1:
+        from_matchday = 1
+
+    all_fixtures = api.retrieve_all_fixtures(league=league)
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        from_=from_matchday,
+        to=current_matchday,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(selected_fixtures)
+    table_printer.print_table_entries(
+        title=f"{LEAGUE_NAMES[league]} Table Last {n} Matchdays",
+        table_list=table_list,
     )
 
 
@@ -120,7 +145,7 @@ def handle_first_round(league: League) -> None:
     table_list = calculate_table_entries(fixtures=selected_fixtures)
 
     table_printer.print_table_entries(
-        league=league, matchday=FIRST_ROUND_MATCHDAY, table_list=table_list
+        title=f"{LEAGUE_NAMES[league]} First Round Table", table_list=table_list
     )
 
 
@@ -137,7 +162,7 @@ def handle_second_round(league: League, current_matchday: int) -> None:
     table_list = calculate_table_entries(fixtures=selected_fixtures)
 
     table_printer.print_table_entries(
-        league=league, matchday=FIRST_ROUND_MATCHDAY, table_list=table_list
+        title=f"{LEAGUE_NAMES[league]} Second Round Table", table_list=table_list
     )
 
 

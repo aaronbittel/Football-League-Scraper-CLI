@@ -5,28 +5,24 @@ from rich.console import Console
 from rich.table import Table
 from rich.style import Style
 
-from bundesliga_scraper.api.api import League
 from bundesliga_scraper.datatypes.table_entry import TableEntry
-from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
 
 HEADER_STYLE = Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
 
 
-def print_table_entries(
-    league: League, matchday: int, table_list: list[TableEntry]
-) -> None:
+def print_table_entries(title: int, table_list: list[TableEntry]) -> None:
     print()
-    table = create_table(league, matchday)
+    table = create_table(title)
     add_rows(table, table_list)
 
     console = Console()
     console.print(table)
 
 
-def create_table(league: League, matchday: int) -> None:
+def create_table(title: int) -> None:
     table = Table(
-        title=f"{LEAGUE_NAMES[league]} Matchday {matchday}",
+        title=title,
         box=ROUNDED,
         # show_lines=True,
     )
