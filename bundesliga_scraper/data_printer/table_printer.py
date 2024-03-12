@@ -7,10 +7,10 @@ from rich.style import Style
 
 from bundesliga_scraper.api.api import League
 from bundesliga_scraper.datatypes.table_entry import TableEntry
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
 
 HEADER_STYLE = Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
-LEAGUE_NAMES = {League.Bundesliga: "Bundesliga", League.Bundesliga_2: "2. Bundesliga"}
 
 
 def print_table_entries(

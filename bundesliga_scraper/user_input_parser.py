@@ -3,24 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import sys
 
-from bundesliga_scraper.request_handler import request_handler
-
-FLAGS = [
-    "--table",
-    "--fixture",
-    "-s",
-    "--start-session",
-    "-h",
-    "--help",
-    "--first-round-table",
-    "-frt",
-    "--second-round-table",
-    "-srt",
-]
-
-LEAGUE_ABBR = {"bundesliga": "BL", "2_bundesliga": "2BL"}
+from bundesliga_scraper.request_handler.table_request_handler import (
+    handle_table_request,
+)
+from bundesliga_scraper.request_handler.fixture_request_handler import (
+    handle_fixture_request,
+)
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -38,52 +27,78 @@ def create_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "league",
-        default="bundesliga",
         choices=["bundesliga", "2_bundesliga"],
-        help="Executing the command for the given league",
+        help="Choose the league you want the information for.",
     )
 
-    parser.add_argument(
-        "--table",
+    # parser.add_argument(
+    #     "-s",
+    #     "--start-session",
+    #     dest="session",
+    #     action="store_true",
+    #     help="Starts a session for the given league -> league is now default",
+    # )
+
+    subparsers = parser.add_subparsers(dest="subcommand", help="sub-command-help")
+
+    table_parser = subparsers.add_parser("table", help="table help")
+    table_parser.add_argument(
+        "matchday",
         nargs="?",
-        const=-1,  # indicates current table
         type=int,
-        help="Displaying the table of the given gameday (defaults to current)",
+        default=-1,  # indicates current fixture
+        help="Display table of given matchday, defaults to current",
     )
 
-    parser.add_argument(
-        "--fixture",
-        nargs="?",
-        const=-1,  # indicates current fixture
-        type=int,
-        help="Displaying the fixture / results of the given gameday \
-            (defaults to current)",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--start-session",
-        dest="session",
-        action="store_true",
-        help="Starts a session for the given league -> league is now default",
-    )
-
-    parser.add_argument(
-        "-frt",
-        "--first-round-table",
+    table_parser.add_argument(
+        "-fr",
+        "--first-round",
         action="store_true",
         dest="first_round",
         help="Displaying the table after the first round.",
     )
 
-    parser.add_argument(
-        "-srt",
-        "--second-round-table",
+    table_parser.add_argument(
+        "-sr",
+        "--second-round",
         action="store_true",
         dest="second_round",
         help="Displaying the table after the second round.",
     )
 
+    table_parser.set_defaults(func=handle_table_request)
+
+    fixture_parser = subparsers.add_parser("fixture", help="fixture help")
+    fixture_parser.add_argument(
+        "matchday",
+        nargs="?",
+        type=int,
+        default=-1,  # indicates current fixture
+        help="Displaying the fixture / results of the given gameday \
+            (defaults to current)",
+    )
+
+    fixture_parser.add_argument(
+        "-n",
+        "--next",
+        action="count",
+        default=0,
+        dest="next",
+        help="Display the next fixture. Use once to show the immediate next fixture, \
+          or multiple times to show fixtures further in the future.",
+    )
+
+    fixture_parser.add_argument(
+        "-p",
+        "--previous",
+        action="count",
+        default=0,
+        dest="prev",
+        help="Display the previous fixture. Use once to show the immediate previous fixture, \
+          or multiple times to show fixtures further in the past.",
+    )
+
+    fixture_parser.set_defaults(func=handle_fixture_request)
     return parser
 
 
@@ -94,41 +109,42 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
         parser (argparse.ArgumentParser): parser
     """
     args = parser.parse_args()
+    args.func(args)
 
-    if not any(
-        (args.table, args.fixture, args.session, args.first_round, args.second_round)
-    ):
-        parser.print_help()
+    # if not any(
+    #     (args.table, args.fixture, args.session, args.first_round, args.second_round)
+    # ):
+    #     parser.print_help()
 
-    request_handler.handle_args(vars(args))  # convert Namespace to dictionary
+    # request_handler.handle_args(vars(args))  # convert Namespace to dictionary
 
-    if args.session:
-        start_session(parser, args.league)
+    # if args.session:
+    #     start_session(parser, args.league)
 
 
-def start_session(parser: argparse.ArgumentParser, league: str) -> None:
-    """Controls the flow of the program inside a session.
+# def start_session(parser: argparse.ArgumentParser, league: str) -> None:
+#     """Controls the flow of the program inside a session.
 
-    Args:
-        parser (argparse.ArgumentParser): parser
-        league (str): the league the user created the session with
-    """
-    while True:
-        user_input = input(f"({LEAGUE_ABBR[league.lower()]}) > ").split(" ")
+#     Args:
+#         parser (argparse.ArgumentParser): parser
+#         league (str): the league the user created the session with
+#     """
+#     while True:
+#         user_input = input(f"({LEAGUE_ABBR[league.lower()]}) > ").split(" ")
 
-        if user_input[0].lower() in ["exit", "exit()", "close", "close()"]:
-            sys.exit(0)
+#         if user_input[0].lower() in ["exit", "exit()", "close", "close()"]:
+#             sys.exit(0)
 
-        user_args = ""
-        # if no league was given use league with which session was started
-        if user_input[0] in FLAGS:
-            user_args = [league, *user_input]
-        elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
-            league = user_input[0]
-            user_args = user_input
-        else:
-            user_args = user_input
+#         user_args = ""
+#         # if no league was given use league with which session was started
+#         if user_input[0] in FLAGS:
+#             user_args = [league, *user_input]
+#         elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
+#             league = user_input[0]
+#             user_args = user_input
+#         else:
+#             user_args = user_input
 
-        args = parser.parse_args(user_args)
+#         args = parser.parse_args(user_args)
 
-        request_handler.handle_args(vars(args))  # convert Namespace to dictionary
+#         request_handler.handle_args(vars(args))  # convert Namespace to dictionary

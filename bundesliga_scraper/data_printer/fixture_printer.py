@@ -6,6 +6,7 @@ from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel
 
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 MAX_WIDTH = 67
@@ -23,8 +24,12 @@ def get_fixture_string(fixture: FixtureEntry):
         return f"{fixture.home_team:>30} - : - {fixture.away_team}\n"
 
 
-def print_fixture_entries(fixture_entries: list[FixtureEntry]) -> None:
-    matchday_split = split_matchday_into_weekdays(fixture_entries)
+def print_fixture_entries(
+    league: League, matchday_fixtures: list[FixtureEntry]
+) -> None:
+    matchday_split = split_matchday_into_weekdays(matchday_fixtures)
+
+    print(f"{LEAGUE_NAMES[league]} Fixture {matchday_fixtures[0].matchday}")
 
     for date, fixture_list in matchday_split.items():
         output = ""

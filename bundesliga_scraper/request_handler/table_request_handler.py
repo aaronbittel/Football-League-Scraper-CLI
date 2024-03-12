@@ -12,31 +12,32 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 FIRST_ROUND_MATCHDAY = 17
 
 
-def handle_table_request(user_args: dict[str, str | int]) -> None:
+def handle_table_request(args: dict[str, str | int]) -> None:
     """Handles the table request.
 
     Args:
-        user_args (dict[str, str  |  int]): user arguments
+        args (dict[str, str  |  int]): user arguments
     """
+
     league = (
         api.League.Bundesliga
-        if user_args["league"].lower() == "bundesliga"
+        if args.league == "bundesliga"
         else api.League.Bundesliga_2
     )
 
     current_matchday = api.retrieve_current_matchday(league=league)
-    if user_args["first_round"]:
+    if args.first_round:
         if current_matchday <= FIRST_ROUND_MATCHDAY:
             handle_table(league=league, matchday=-1, current_matchday=current_matchday)
         else:
             handle_first_round(league)
-    elif user_args["second_round"]:
+    elif args.second_round:
         if current_matchday <= FIRST_ROUND_MATCHDAY:
             handle_table(league=league, matchday=-1, current_matchday=current_matchday)
         else:
             handle_second_round(league, current_matchday)
     else:
-        matchday = user_args["table"]
+        matchday = args.matchday
         handle_table(
             league=league, matchday=matchday, current_matchday=current_matchday
         )
