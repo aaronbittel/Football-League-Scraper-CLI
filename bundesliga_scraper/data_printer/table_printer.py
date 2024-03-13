@@ -11,10 +11,12 @@ HEADER_STYLE = Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
 
 
-def print_table_entries(title: int, table_list: list[TableEntry]) -> None:
+def print_table_entries(
+    title: int, table_list: list[TableEntry], highlights: list[str]
+) -> None:
     print()
     table = create_table(title)
-    add_rows(table, table_list)
+    add_rows(table, table_list, highlights)
 
     console = Console()
     console.print(table)
@@ -43,14 +45,11 @@ def create_table(title: int) -> None:
     return table
 
 
-def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
+def add_rows(
+    table: Table, table_entries: list[TableEntry], highlights: list[str]
+) -> None:
     for placement, entry in enumerate(table_entries, start=1):
-        style = (
-            "white on cyan"
-            if entry.team_name == "FC Bayern München"
-            or entry.team_name == "FC Augsburg"
-            else ""
-        )
+        style = "white on cyan" if entry.team_name in highlights else ""
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(placement, entry.direction)
         table.add_row(

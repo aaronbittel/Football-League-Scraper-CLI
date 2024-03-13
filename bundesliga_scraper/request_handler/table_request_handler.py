@@ -43,46 +43,26 @@ def handle_table_request(args: Namespace) -> None:
     table_list_job_queue = []
 
     if args.first_round:
-        first_round_selector = get_first_round_selector(current_matchday)
-        title = f"{LEAGUE_NAMES[league]} First Round Table"
-        table_list_job_queue.append(
-            {"title": title, "selector": first_round_selector, "func": calculate_table}
-        )
+        table_list_job_queue.append(create_first_round_job(league, current_matchday))
 
     if args.second_round:
-        second_round_selector = get_second_round_selector(current_matchday)
-        title = f"{LEAGUE_NAMES[league]} Second Round Table"
-        table_list_job_queue.append(
-            {"title": title, "selector": second_round_selector, "func": calculate_table}
-        )
+        table_list_job_queue.append(create_second_round_job(league, current_matchday))
 
     if args.last:
-        last_selector = get_last_selector(args.last, current_matchday)
-        title = f"{LEAGUE_NAMES[league]} Table Last {args.last} Matches"
         table_list_job_queue.append(
-            {"title": title, "selector": last_selector, "func": calculate_table}
+            create_last_job(args.last, league, current_matchday)
         )
 
     if args.since:
-        since_selector = get_since_selector(args.since, current_matchday)
-        title = f"{LEAGUE_NAMES[league]} Table Since Matchday {args.since}"
         table_list_job_queue.append(
-            {"title": title, "selector": since_selector, "func": calculate_table}
+            create_since_job(args.since, league, current_matchday)
         )
 
     if args.home:
-        home_selector = get_home_selector(current_matchday)
-        title = f"{LEAGUE_NAMES[league]} Home Table"
-        table_list_job_queue.append(
-            {"title": title, "selector": home_selector, "func": calculate_home_table}
-        )
+        table_list_job_queue.append(create_home_job(league, current_matchday))
 
     if args.away:
-        away_selector = get_away_selector(current_matchday)
-        title = f"{LEAGUE_NAMES[league]} Away Table"
-        table_list_job_queue.append(
-            {"title": title, "selector": away_selector, "func": calculate_away_table}
-        )
+        table_list_job_queue.append(create_away_job(league, current_matchday))
 
     if args.matchday or not any(
         (
@@ -94,17 +74,64 @@ def handle_table_request(args: Namespace) -> None:
             args.away,
         )
     ):
-        selector = handle_matchday_request(matchday)
-        title = f"{LEAGUE_NAMES[league]} Table Matchday {matchday}"
-        table_list_job_queue.append(
-            {"title": title, "selector": selector, "func": calculate_table}
-        )
+        # table_list = handle_table(
+        #     all_fixtures=all_fixtures,
+        #     matchday=matchday,
+        #     current_matchday=current_matchday,
+        # )
+        # table_printer.print_table_entries(
+        #     title=f"{LEAGUE_NAMES[league]} Table Matchday {matchday}",
+        #     table_list=table_list,
+        # )
+        table_list_job_queue.append(create_matchday_job(league, matchday))
 
     for job in table_list_job_queue:
         title, selector, calculate = job["title"], job["selector"], job["func"]
         selected_fixtures = select_fixtures(all_fixtures, selector)
         table_list = calculate(selected_fixtures)
-        table_printer.print_table_entries(title, table_list)
+        table_printer.print_table_entries(title, table_list, args.highlights)
+
+
+def create_matchday_job(league: League, matchday: int) -> dict:
+    selector = get_matchday_selector(matchday)
+    title = f"{LEAGUE_NAMES[league]} Table Matchday {matchday}"
+    return {"title": title, "selector": selector, "func": calculate_table}
+
+
+def create_away_job(league: League, current_matchday: int) -> dict:
+    away_selector = get_away_selector(current_matchday)
+    title = f"{LEAGUE_NAMES[league]} Away Table"
+    return {"title": title, "selector": away_selector, "func": calculate_away_table}
+
+
+def create_home_job(league: League, current_matchday: int) -> dict:
+    home_selector = get_home_selector(current_matchday)
+    title = f"{LEAGUE_NAMES[league]} Home Table"
+    return {"title": title, "selector": home_selector, "func": calculate_home_table}
+
+
+def create_since_job(since: int, league: League, current_matchday: int) -> dict:
+    since_selector = get_since_selector(since, current_matchday)
+    title = f"{LEAGUE_NAMES[league]} Table Since Matchday {since}"
+    return {"title": title, "selector": since_selector, "func": calculate_table}
+
+
+def create_last_job(last: int, league: League, current_matchday: int) -> dict:
+    last_selector = get_last_selector(last, current_matchday)
+    title = f"{LEAGUE_NAMES[league]} Table Last {last} Matches"
+    return {"title": title, "selector": last_selector, "func": calculate_table}
+
+
+def create_second_round_job(league: League, current_matchday: int) -> dict:
+    second_round_selector = get_second_round_selector(current_matchday)
+    title = f"{LEAGUE_NAMES[league]} Second Round Table"
+    return {"title": title, "selector": second_round_selector, "func": calculate_table}
+
+
+def create_first_round_job(league: League, current_matchday: int) -> dict:
+    first_round_selector = get_first_round_selector(current_matchday)
+    title = f"{LEAGUE_NAMES[league]} First Round Table"
+    return {"title": title, "selector": first_round_selector, "func": calculate_table}
 
 
 def standard_title(league: League, matchday: int) -> str:
@@ -127,11 +154,11 @@ def handle_table(
     if matchday < 1 or matchday > 34:
         raise ValueError(f"matchday must be between 1 and 34. You gave {matchday}.")
 
-    selected_fixtures = select_fixtures(all_fixtures=all_fixtures, to=matchday - 1)
+    selected_fixtures = select_fixtures(all_fixtures, FixtureSelector(to=matchday - 1))
 
     table_list_prior_matchday = calculate_table(selected_fixtures)
 
-    selected_fixtures = select_fixtures(all_fixtures=all_fixtures, to=matchday)
+    selected_fixtures = select_fixtures(all_fixtures, FixtureSelector(to=matchday))
     table_list = calculate_table(selected_fixtures)
 
     if matchday != 1:
@@ -154,7 +181,7 @@ def get_away_selector(current_matchday: int) -> FixtureSelector:
     return FixtureSelector(to=current_matchday)
 
 
-def handle_matchday_request(matchday: int) -> FixtureSelector:
+def get_matchday_selector(matchday: int) -> FixtureSelector:
     matchday = min(MAX_MATCHDAY, max(1, matchday))
     return FixtureSelector(to=matchday, include_postponed_matches=False)
 
@@ -252,11 +279,3 @@ def index_of(entry: TableEntry, table_list: list[TableEntry]) -> int:
     for i, table_entry in enumerate(table_list):
         if table_entry.team_name == entry.team_name:
             return i
-
-
-def game_is_in_future(fixture: FixtureEntry, matchday: int) -> bool:
-    return (
-        fixture.matchday > matchday
-        or not fixture.match_is_finished
-        and not fixture.match_is_live
-    )

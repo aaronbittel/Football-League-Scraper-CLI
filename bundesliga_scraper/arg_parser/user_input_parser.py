@@ -100,7 +100,7 @@ def create_parser() -> argparse.ArgumentParser:
     table_parser.add_argument(
         "-hl",
         "--highlight",
-        dest="highlight",
+        dest="highlights",
         nargs="+",
         help="Give a list of teams that will be highlighted in the output.",
     )
