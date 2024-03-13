@@ -24,23 +24,56 @@ def handle_table_request(args: dict[str, str | int]) -> None:
         else api.League.Bundesliga_2
     )
 
+    all_fixtures = api.retrieve_all_fixtures(league)
+
     current_matchday = api.retrieve_current_matchday(league=league)
     if args.first_round:
         if current_matchday <= FIRST_ROUND_MATCHDAY:
-            handle_table(league=league, matchday=-1, current_matchday=current_matchday)
+            handle_table(
+                all_fixtures=all_fixtures,
+                league=league,
+                matchday=None,
+                current_matchday=current_matchday,
+            )
         else:
-            handle_first_round(league)
-    elif args.second_round:
+            handle_first_round(all_fixtures=all_fixtures, league=league)
+    if args.second_round:
         if current_matchday <= FIRST_ROUND_MATCHDAY:
-            handle_table(league=league, matchday=-1, current_matchday=current_matchday)
+            handle_table(
+                all_fixtures=all_fixtures,
+                league=league,
+                matchday=None,
+                current_matchday=current_matchday,
+            )
         else:
-            handle_second_round(league, current_matchday)
-    elif args.last:
-        handle_table_last(league, args.last, current_matchday)
-    else:
-        matchday = args.matchday
+            handle_second_round(
+                all_fixtures=all_fixtures,
+                league=league,
+                current_matchday=current_matchday,
+            )
+    if args.last:
+        handle_table_last(
+            all_fixtures=all_fixtures,
+            league=league,
+            n=args.last,
+            current_matchday=current_matchday,
+        )
+
+    if args.since:
+        handle_table_since(
+            all_fixtures=all_fixtures,
+            league=league,
+            since=args.since,
+            current_matchday=current_matchday,
+        )
+
+    if not any((args.first_round, args.second_round, args.last, args.since)):
+        matchday = current_matchday if args.matchday is None else args.matchday
         handle_table(
-            league=league, matchday=matchday, current_matchday=current_matchday
+            all_fixtures=all_fixtures,
+            league=league,
+            matchday=matchday,
+            current_matchday=current_matchday,
         )
 
 
@@ -48,9 +81,14 @@ def standard_title(league: League, matchday: int) -> str:
     return f"{LEAGUE_NAMES[league]} Matchday {matchday}"
 
 
-def handle_table(league: League, matchday: int, current_matchday: int) -> None:
+def handle_table(
+    all_fixtures: list[FixtureEntry],
+    league: League,
+    matchday: int,
+    current_matchday: int,
+) -> None:
     # -1 == get current one
-    if matchday == -1:
+    if matchday is None:
         matchday = current_matchday
 
     # need to calculate the table for the given matchday by myself
@@ -59,8 +97,6 @@ def handle_table(league: League, matchday: int, current_matchday: int) -> None:
     # TODO: Depending on League max matchday may be greater or less than 34
     if matchday < 1 or matchday > 34:
         raise ValueError(f"matchday must be between 1 and 34. You gave {matchday}.")
-
-    all_fixtures = api.retrieve_all_fixtures(league=league)
 
     selected_fixtures = select_fixtures(all_fixtures=all_fixtures, to=matchday - 1)
 
@@ -83,12 +119,13 @@ def handle_table(league: League, matchday: int, current_matchday: int) -> None:
     )
 
 
-def handle_table_last(league: League, n: int, current_matchday: int) -> None:
+def handle_table_last(
+    all_fixtures: list[FixtureEntry], league: League, n: int, current_matchday: int
+) -> None:
     from_matchday = current_matchday - n + 1
     if from_matchday < 1:
         from_matchday = 1
 
-    all_fixtures = api.retrieve_all_fixtures(league=league)
     selected_fixtures = select_fixtures(
         all_fixtures=all_fixtures,
         from_=from_matchday,
@@ -99,6 +136,26 @@ def handle_table_last(league: League, n: int, current_matchday: int) -> None:
     table_list = calculate_table_entries(selected_fixtures)
     table_printer.print_table_entries(
         title=f"{LEAGUE_NAMES[league]} Table Last {n} Matchdays",
+        table_list=table_list,
+    )
+
+
+def handle_table_since(
+    all_fixtures: list[FixtureEntry], league: League, since: int, current_matchday: int
+):
+    if since > current_matchday:
+        since = current_matchday
+
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        from_=since,
+        to=current_matchday,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(selected_fixtures)
+    table_printer.print_table_entries(
+        title=f"{LEAGUE_NAMES[league]} Table since Matchday {since}",
         table_list=table_list,
     )
 
@@ -133,9 +190,7 @@ def select_fixtures(
     return selected_fixtures
 
 
-def handle_first_round(league: League) -> None:
-    all_fixtures = api.retrieve_all_fixtures(league=league)
-
+def handle_first_round(all_fixtures: list[FixtureEntry], league: League) -> None:
     selected_fixtures = select_fixtures(
         all_fixtures=all_fixtures,
         to=FIRST_ROUND_MATCHDAY,
@@ -149,9 +204,9 @@ def handle_first_round(league: League) -> None:
     )
 
 
-def handle_second_round(league: League, current_matchday: int) -> None:
-    all_fixtures = api.retrieve_all_fixtures(league=league)
-
+def handle_second_round(
+    all_fixtures: list[FixtureEntry], league: League, current_matchday: int
+) -> None:
     selected_fixtures = select_fixtures(
         all_fixtures=all_fixtures,
         from_=FIRST_ROUND_MATCHDAY,

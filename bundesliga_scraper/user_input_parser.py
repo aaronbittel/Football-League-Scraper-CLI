@@ -46,8 +46,7 @@ def create_parser() -> argparse.ArgumentParser:
         "matchday",
         nargs="?",
         type=int,
-        default=-1,  # indicates current fixture
-        help="Display table of given matchday, defaults to current",
+        help="Display table of given matchday, if none is given displays current",
     )
 
     table_parser.add_argument(
@@ -72,6 +71,14 @@ def create_parser() -> argparse.ArgumentParser:
         dest="last",
         type=int,
         help="Calculates the last {n} matchdays and displays it.",
+    )
+
+    table_parser.add_argument(
+        "-s",
+        "--since",
+        dest="since",
+        type=int,
+        help="Calculates from given matchday to present.",
     )
 
     table_parser.set_defaults(func=handle_table_request)
@@ -118,41 +125,3 @@ def parse_user_args(parser: argparse.ArgumentParser) -> None:
     """
     args = parser.parse_args()
     args.func(args)
-
-    # if not any(
-    #     (args.table, args.fixture, args.session, args.first_round, args.second_round)
-    # ):
-    #     parser.print_help()
-
-    # request_handler.handle_args(vars(args))  # convert Namespace to dictionary
-
-    # if args.session:
-    #     start_session(parser, args.league)
-
-
-# def start_session(parser: argparse.ArgumentParser, league: str) -> None:
-#     """Controls the flow of the program inside a session.
-
-#     Args:
-#         parser (argparse.ArgumentParser): parser
-#         league (str): the league the user created the session with
-#     """
-#     while True:
-#         user_input = input(f"({LEAGUE_ABBR[league.lower()]}) > ").split(" ")
-
-#         if user_input[0].lower() in ["exit", "exit()", "close", "close()"]:
-#             sys.exit(0)
-
-#         user_args = ""
-#         # if no league was given use league with which session was started
-#         if user_input[0] in FLAGS:
-#             user_args = [league, *user_input]
-#         elif user_input[0] in LEAGUE_ABBR and ("-s" or "--start-session" in user_input):
-#             league = user_input[0]
-#             user_args = user_input
-#         else:
-#             user_args = user_input
-
-#         args = parser.parse_args(user_args)
-
-#         request_handler.handle_args(vars(args))  # convert Namespace to dictionary
