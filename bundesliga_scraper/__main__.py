@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Entry point."""
 
-from bundesliga_scraper import user_input_parser
+from bundesliga_scraper.arg_parser import user_input_parser
 
 
 def main() -> None:

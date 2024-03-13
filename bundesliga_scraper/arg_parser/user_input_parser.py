@@ -97,6 +97,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Calculates and displays the away table.",
     )
 
+    table_parser.add_argument(
+        "-hl",
+        "--highlight",
+        dest="highlight",
+        nargs="+",
+        help="Give a list of teams that will be highlighted in the output.",
+    )
+
     table_parser.set_defaults(func=handle_table_request)
 
     fixture_parser = subparsers.add_parser("fixture", help="fixture help")

@@ -45,6 +45,12 @@ def create_table(title: int) -> None:
 
 def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
     for placement, entry in enumerate(table_entries, start=1):
+        style = (
+            "white on cyan"
+            if entry.team_name == "FC Bayern München"
+            or entry.team_name == "FC Augsburg"
+            else ""
+        )
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(placement, entry.direction)
         table.add_row(
@@ -58,6 +64,7 @@ def add_rows(table: Table, table_entries: list[TableEntry]) -> None:
             goal_diff,
             str(entry.points),
             "".join(entry.history[:5]),
+            style=style,
         )
 
 

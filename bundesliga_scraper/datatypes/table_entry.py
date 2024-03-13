@@ -51,34 +51,34 @@ class TableEntry:
         self.goals += fixture.away_goals
         self.opponent_goals += fixture.home_goals
         if match_result == MatchResult.HOME_WON:
-            self.update_after_lose(fixture.match_is_live)
+            self._update_after_lose(fixture.match_is_live)
         elif match_result == MatchResult.AWAY_WON:
-            self.update_after_win(fixture.match_is_live)
+            self._update_after_win(fixture.match_is_live)
         else:
-            self.update_after_draw(fixture.match_is_live)
+            self._update_after_draw(fixture.match_is_live)
 
     def update_home_team(self, fixture: FixtureEntry, match_result: MatchResult):
         self.goals += fixture.home_goals
         self.opponent_goals += fixture.away_goals
         if match_result == MatchResult.HOME_WON:
-            self.update_after_win(fixture.match_is_live)
+            self._update_after_win(fixture.match_is_live)
         elif match_result == MatchResult.AWAY_WON:
-            self.update_after_lose(fixture.match_is_live)
+            self._update_after_lose(fixture.match_is_live)
         else:
-            self.update_after_draw(fixture.match_is_live)
+            self._update_after_draw(fixture.match_is_live)
 
-    def update_after_draw(self, is_live: bool) -> None:
+    def _update_after_draw(self, is_live: bool) -> None:
         self.points += 1
         self.draw += 1
         if not is_live:
             self.history.insert(0, ResultSymbol.DRAW.value)
 
-    def update_after_lose(self, is_live: bool) -> None:
+    def _update_after_lose(self, is_live: bool) -> None:
         self.lost += 1
         if not is_live:
             self.history.insert(0, ResultSymbol.LOSE.value)
 
-    def update_after_win(self, is_live: bool) -> None:
+    def _update_after_win(self, is_live: bool) -> None:
         self.points += 3
         self.won += 1
         if not is_live:
