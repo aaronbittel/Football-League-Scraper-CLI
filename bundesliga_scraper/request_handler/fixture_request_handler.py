@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
+
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
@@ -9,11 +11,11 @@ from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 MAX_MATCHDAY = 34
 
 
-def handle_fixture_request(args: dict[str, str | int]) -> None:
+def handle_fixture_request(args: Namespace) -> None:
     """Handles the fixture request.
 
     Args:
-        args (dict[str, str  |  int]): user arguments
+        args (Namespace): user arguments
     """
     league = (
         api.League.Bundesliga
@@ -26,7 +28,7 @@ def handle_fixture_request(args: dict[str, str | int]) -> None:
     matchday = args.matchday
 
     # user did not provide a matchday -> get current
-    if matchday == -1:
+    if matchday is None:
         effective_count = args.next - args.prev
         matchday = api.retrieve_current_matchday(league) + effective_count
         matchday = min(MAX_MATCHDAY, max(1, matchday))

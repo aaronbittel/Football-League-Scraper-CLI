@@ -81,6 +81,22 @@ def create_parser() -> argparse.ArgumentParser:
         help="Calculates from given matchday to present.",
     )
 
+    table_parser.add_argument(
+        "-H",
+        "--home",
+        dest="home",
+        action="store_true",
+        help="Calculates and displays the home table.",
+    )
+
+    table_parser.add_argument(
+        "-a",
+        "--away",
+        dest="away",
+        action="store_true",
+        help="Calculates and displays the away table.",
+    )
+
     table_parser.set_defaults(func=handle_table_request)
 
     fixture_parser = subparsers.add_parser("fixture", help="fixture help")
@@ -88,7 +104,6 @@ def create_parser() -> argparse.ArgumentParser:
         "matchday",
         nargs="?",
         type=int,
-        default=-1,  # indicates current fixture
         help="Displaying the fixture / results of the given gameday \
             (defaults to current)",
     )

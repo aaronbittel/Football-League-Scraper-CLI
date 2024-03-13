@@ -40,26 +40,32 @@ class TableEntry:
         match_result: MatchResult = fixture.get_result()
 
         if self.team_name == fixture.get_home_team():
-            self.goals += fixture.home_goals
-            self.opponent_goals += fixture.away_goals
-            if match_result == MatchResult.HOME_WON:
-                self.update_after_win(fixture.match_is_live)
-            elif match_result == MatchResult.AWAY_WON:
-                self.update_after_lose(fixture.match_is_live)
-            else:
-                self.update_after_draw(fixture.match_is_live)
+            self.update_home_team(fixture, match_result)
         else:
-            self.goals += fixture.away_goals
-            self.opponent_goals += fixture.home_goals
-            if match_result == MatchResult.HOME_WON:
-                self.update_after_lose(fixture.match_is_live)
-            elif match_result == MatchResult.AWAY_WON:
-                self.update_after_win(fixture.match_is_live)
-            else:
-                self.update_after_draw(fixture.match_is_live)
+            self.update_away_team(fixture, match_result)
 
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals
+
+    def update_away_team(self, fixture: FixtureEntry, match_result: MatchResult):
+        self.goals += fixture.away_goals
+        self.opponent_goals += fixture.home_goals
+        if match_result == MatchResult.HOME_WON:
+            self.update_after_lose(fixture.match_is_live)
+        elif match_result == MatchResult.AWAY_WON:
+            self.update_after_win(fixture.match_is_live)
+        else:
+            self.update_after_draw(fixture.match_is_live)
+
+    def update_home_team(self, fixture: FixtureEntry, match_result: MatchResult):
+        self.goals += fixture.home_goals
+        self.opponent_goals += fixture.away_goals
+        if match_result == MatchResult.HOME_WON:
+            self.update_after_win(fixture.match_is_live)
+        elif match_result == MatchResult.AWAY_WON:
+            self.update_after_lose(fixture.match_is_live)
+        else:
+            self.update_after_draw(fixture.match_is_live)
 
     def update_after_draw(self, is_live: bool) -> None:
         self.points += 1

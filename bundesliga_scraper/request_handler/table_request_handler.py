@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
+
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import table_printer
 from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
@@ -11,11 +13,11 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 FIRST_ROUND_MATCHDAY = 17
 
 
-def handle_table_request(args: dict[str, str | int]) -> None:
+def handle_table_request(args: Namespace) -> None:
     """Handles the table request.
 
     Args:
-        args (dict[str, str  |  int]): user arguments
+        args (Namespace): user arguments
     """
 
     league = (
@@ -67,7 +69,26 @@ def handle_table_request(args: dict[str, str | int]) -> None:
             current_matchday=current_matchday,
         )
 
-    if not any((args.first_round, args.second_round, args.last, args.since)):
+    if args.home:
+        handle_home(
+            all_fixtures=all_fixtures, league=league, current_matchday=current_matchday
+        )
+
+    if args.away:
+        handle_away(
+            all_fixtures=all_fixtures, league=league, current_matchday=current_matchday
+        )
+
+    if not any(
+        (
+            args.first_round,
+            args.second_round,
+            args.last,
+            args.since,
+            args.home,
+            args.away,
+        )
+    ):
         matchday = current_matchday if args.matchday is None else args.matchday
         handle_table(
             all_fixtures=all_fixtures,
@@ -116,6 +137,40 @@ def handle_table(
 
     table_printer.print_table_entries(
         title=standard_title(league=league, matchday=matchday), table_list=table_list
+    )
+
+
+def handle_home(
+    all_fixtures: list[FixtureEntry], league: League, current_matchday: int
+) -> None:
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        from_=1,
+        to=current_matchday,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(fixtures=selected_fixtures, away=False)
+
+    table_printer.print_table_entries(
+        title=f"{LEAGUE_NAMES[league]} Home Table", table_list=table_list
+    )
+
+
+def handle_away(
+    all_fixtures: list[FixtureEntry], league: League, current_matchday: int
+) -> None:
+    selected_fixtures = select_fixtures(
+        all_fixtures=all_fixtures,
+        from_=1,
+        to=current_matchday,
+        include_postponed_matches=True,
+    )
+
+    table_list = calculate_table_entries(fixtures=selected_fixtures, home=False)
+
+    table_printer.print_table_entries(
+        title=f"{LEAGUE_NAMES[league]} Home Table", table_list=table_list
     )
 
 
@@ -221,13 +276,17 @@ def handle_second_round(
     )
 
 
-def calculate_table_entries(fixtures: list[FixtureEntry]) -> list[TableEntry]:
+def calculate_table_entries(
+    fixtures: list[FixtureEntry], home: bool = True, away: bool = True
+) -> list[TableEntry]:
     # TODO Somehow use Defaultdict
     table_entries = initialize_empty_table_entries_dict(fixtures)
 
     for fixture in fixtures:
-        table_entries[fixture.home_team].update(fixture)
-        table_entries[fixture.away_team].update(fixture)
+        if home:
+            table_entries[fixture.home_team].update(fixture)
+        if away:
+            table_entries[fixture.away_team].update(fixture)
 
     table_list = list(table_entries.values())
     return sorted(table_list, reverse=True)
