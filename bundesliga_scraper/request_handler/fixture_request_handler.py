@@ -6,6 +6,7 @@ from argparse import Namespace
 
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 MAX_MATCHDAY = 34
@@ -42,6 +43,9 @@ def handle_fixture_request(args: Namespace) -> None:
             if total == 9:
                 break
 
+    title = f"{LEAGUE_NAMES[league]} Fixture {matchday_fixtures[0].matchday}"
+    highlights = [] if args.highlights is None else args.highlights
+
     fixture_printer.print_fixture_entries(
-        league=league, matchday_fixtures=matchday_fixtures
+        title=title, matchday_fixtures=matchday_fixtures, highlights=highlights
     )

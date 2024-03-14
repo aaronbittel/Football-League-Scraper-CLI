@@ -9,6 +9,7 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 
 HEADER_STYLE = Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
+HIGHLIGHT_STYLE = "white on orange3"
 
 
 def print_table_entries(
@@ -49,7 +50,7 @@ def add_rows(
     table: Table, table_entries: list[TableEntry], highlights: list[str]
 ) -> None:
     for placement, entry in enumerate(table_entries, start=1):
-        style = "white on cyan" if entry.team_name in highlights else ""
+        style = HIGHLIGHT_STYLE if entry.team_name in highlights else ""
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(placement, entry.direction)
         table.add_row(

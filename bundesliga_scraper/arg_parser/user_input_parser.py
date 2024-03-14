@@ -136,6 +136,14 @@ def create_parser() -> argparse.ArgumentParser:
           or multiple times to show fixtures further in the past.",
     )
 
+    fixture_parser.add_argument(
+        "-hl",
+        "--highlight",
+        dest="highlights",
+        nargs="+",
+        help="Give a list of teams that will be highlighted in the output.",
+    )
+
     fixture_parser.set_defaults(func=handle_fixture_request)
     return parser
 

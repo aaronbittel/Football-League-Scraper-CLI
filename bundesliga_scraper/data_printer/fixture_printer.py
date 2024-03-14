@@ -5,86 +5,102 @@ from datetime import datetime
 
 from rich.console import Console
 from rich.panel import Panel
+from rich.text import Text
 
-from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
-MAX_WIDTH = 67
 WINNING_STYLE = "[bold pale_green3]"
-END_WINNING_STYLE = "[/bold pale_green3]"
+WINNING_STYLE_END = f"[/{WINNING_STYLE[1:]}"
+HIGHLIGHT_STYLE = "[on orange3]"
+HIGHLIGHT_STYLE_END = f"[/{HIGHLIGHT_STYLE[1:]}"
+
+WIDTH = 62
+MATCH_SEPERATOR = " : "
+FUTURE_MATCH_SEPERATOR = " - : - "
+NAME_SPACE = (WIDTH - len(MATCH_SEPERATOR)) // 2
+NAME_SPACE_2 = (WIDTH - len(FUTURE_MATCH_SEPERATOR)) // 2
 
 
-def get_fixture_string(fixture: FixtureEntry):
-    # TODO Check if game is live and display its live score
+def get_fixture_text(fixture: FixtureEntry, highlights: list[str]) -> str:
     if fixture.match_is_finished or fixture.match_is_live:
-        home_string = get_home_team_string(fixture)
-        away_string = get_away_team_string(fixture)
-        return f"{home_string} : {away_string}\n"
+        home_string = get_home_team_styled_string(fixture)
+        away_string = get_away_team_styled_string(fixture)
+        match_string = f"{home_string}{MATCH_SEPERATOR}{away_string}"
     else:
-        return f"{fixture.home_team:>30} - : - {fixture.away_team}\n"
+        match_string = f"{fixture.home_team.rjust(NAME_SPACE_2)}{FUTURE_MATCH_SEPERATOR}{fixture.away_team.ljust(NAME_SPACE_2)}"
+
+    if fixture.home_team in highlights or fixture.away_team in highlights:
+        return f"{HIGHLIGHT_STYLE}{match_string}{HIGHLIGHT_STYLE_END}"
+
+    return match_string
 
 
 def print_fixture_entries(
-    league: League, matchday_fixtures: list[FixtureEntry]
+    title: str, matchday_fixtures: list[FixtureEntry], highlights: list[str]
 ) -> None:
-    matchday_split = split_matchday_into_weekdays(matchday_fixtures)
+    console = Console()
+    fixture_weekdays_split = split_fixture_into_weekdays(matchday_fixtures)
 
-    print(f"{LEAGUE_NAMES[league]} Fixture {matchday_fixtures[0].matchday}")
+    print_title(console, title)
 
-    for date, fixture_list in matchday_split.items():
-        output = ""
-        current_time = datetime.today()
-        for fixture in fixture_list:
-            if not (
-                current_time.hour == fixture.date.hour
-                and current_time.minute == fixture.date.minute
-            ):
-                output += fixture.date.strftime(r"%H:%M") + "\n"
-                current_time = fixture.date
-                if fixture.match_is_live:
-                    output = output[:-1]
-                    # output += " " * 50 + "[blink]🔴 LIVE[/blink]\n"
-                    output += " " * 50 + "🔴 LIVE\n"
-            output += get_fixture_string(fixture)
-        output = output[:-1]
-        Console().print(
+    for weekday_date, kickoff_times in fixture_weekdays_split.items():
+        panel_content = ""
+        for kickoff_time, fixtures in kickoff_times.items():
+            panel_content += f"{kickoff_time}\n"
+            is_live = any(fixture.match_is_live for fixture in fixtures)
+            if is_live:
+                panel_content = panel_content[:-1] + "🔴 LIVE\n"
+            panel_content += "\n".join(
+                get_fixture_text(fixture, highlights) for fixture in fixtures
+            )
+
+        console.print(
             Panel(
-                renderable=output,
-                title=date,
-                width=MAX_WIDTH,
+                renderable=panel_content,
+                title=weekday_date.strftime(r"%d.%m.%Y, %A"),
+                width=WIDTH,
                 padding=1,
             )
         )
 
 
-def split_matchday_into_weekdays(
+def print_title(console: Console, title: str) -> None:
+    leftspace = (WIDTH - len(title)) // 2
+    console.print(Text(leftspace * " ") + Text(f"{title}\n", style="bold italic"))
+
+
+def split_fixture_into_weekdays(
     fixture_entries: list[FixtureEntry],
-) -> defaultdict[str, list[FixtureEntry]]:
-    matchday_split = defaultdict(list)
+) -> defaultdict[datetime, list[FixtureEntry]]:
+    matchday_split = defaultdict(lambda: defaultdict(list))
+
     for fixture in fixture_entries:
-        matchday_split[fixture.date.strftime(r"%d.%m.%Y, %A")].append(fixture)
+        matchday_split[fixture.date.date()][fixture.date.strftime(r"%H:%M")].append(
+            fixture
+        )
+
     return matchday_split
 
 
-def home_string(fixture: FixtureEntry) -> str:
-    return f"{fixture.home_team:>30}{fixture.home_goals:>3}"
+def get_home_string(fixture: FixtureEntry) -> str:
+    return f"{fixture.home_team} {fixture.home_goals}"
 
 
-def away_string(fixture: FixtureEntry) -> str:
-    return f"{fixture.away_goals:<3}{fixture.away_team}"
+def get_away_string(fixture: FixtureEntry) -> str:
+    return f"{fixture.away_goals} {fixture.away_team}"
 
 
-def get_home_team_string(fixture: FixtureEntry) -> str:
-    return (
-        f"{WINNING_STYLE}{home_string(fixture)}{END_WINNING_STYLE}"
-        if fixture.home_team_won()
-        else home_string(fixture)
-    )
+def get_home_team_styled_string(fixture: FixtureEntry) -> str:
+    home_string = f"{get_home_string(fixture).rjust(NAME_SPACE)}"
+    if fixture.home_team_won():
+        return f"{WINNING_STYLE}{home_string}{WINNING_STYLE_END}"
+    else:
+        return home_string
 
 
-def get_away_team_string(fixture: FixtureEntry) -> str:
-    return (
-        f"{WINNING_STYLE}{away_string(fixture)}{END_WINNING_STYLE}"
-        if fixture.away_team_won()
-        else away_string(fixture)
-    )
+def get_away_team_styled_string(fixture: FixtureEntry) -> str:
+    away_string = f"{get_away_string(fixture).ljust(NAME_SPACE)}"
+    if fixture.away_team_won():
+        return f"{WINNING_STYLE}{away_string}{WINNING_STYLE_END}"
+    else:
+        return away_string

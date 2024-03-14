@@ -89,7 +89,8 @@ def handle_table_request(args: Namespace) -> None:
         title, selector, calculate = job["title"], job["selector"], job["func"]
         selected_fixtures = select_fixtures(all_fixtures, selector)
         table_list = calculate(selected_fixtures)
-        table_printer.print_table_entries(title, table_list, args.highlights)
+        highlights = [] if args.highlights is None else args.highlights
+        table_printer.print_table_entries(title, table_list, highlights)
 
 
 def create_matchday_job(league: League, matchday: int) -> dict:
