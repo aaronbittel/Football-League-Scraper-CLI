@@ -63,7 +63,7 @@ def add_rows(
             f"{entry.goals}:{entry.opponent_goals}",
             goal_diff,
             str(entry.points),
-            "".join(entry.history[:5]),
+            "".join(entry.history.matches[:5]),
             style=style,
         )
 

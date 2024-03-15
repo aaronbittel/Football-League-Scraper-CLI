@@ -12,6 +12,7 @@ dependencies = [
   "argparse",
   "requests",
   "rich",
+  "plotext",
 ]
 
 [project.optional-dependencies]

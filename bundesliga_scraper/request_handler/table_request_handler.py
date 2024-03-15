@@ -133,41 +133,6 @@ def standard_title(league: League, matchday: int) -> str:
     return f"{LEAGUE_NAMES[league]} Matchday {matchday}"
 
 
-def handle_table(
-    all_fixtures: list[FixtureEntry],
-    matchday: int,
-    current_matchday: int,
-) -> None:
-    # -1 == get current one
-    if matchday is None:
-        matchday = current_matchday
-
-    # need to calculate the table for the given matchday by myself
-    # get all fixtures -> calculate till matchday
-
-    # TODO: Depending on League max matchday may be greater or less than 34
-    if matchday < 1 or matchday > 34:
-        raise ValueError(f"matchday must be between 1 and 34. You gave {matchday}.")
-
-    selected_fixtures = select_fixtures(all_fixtures, FixtureSelector(to=matchday - 1))
-
-    table_list_prior_matchday = calculate_table(selected_fixtures)
-
-    selected_fixtures = select_fixtures(all_fixtures, FixtureSelector(to=matchday))
-    table_list = calculate_table(selected_fixtures)
-
-    if matchday != 1:
-        for pl, entry in enumerate(table_list):
-            old_pl = index_of(entry=entry, table_list=table_list_prior_matchday)
-            if pl == old_pl:
-                continue
-            elif pl > old_pl:
-                entry.direction = -1
-            else:
-                entry.direction = 1
-    return table_list
-
-
 def get_home_selector(active_matchday: int) -> FixtureSelector:
     return FixtureSelector(to=active_matchday)
 

@@ -9,6 +9,13 @@ from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 
 @dataclass
+class History:
+    matches: list[str] = field(default_factory=list)
+    placements: list[str] = field(default_factory=list)
+    points: list[str] = field(default_factory=list)
+
+
+@dataclass
 class TableEntry:
     team_name: str
     points: int = 0
@@ -20,7 +27,7 @@ class TableEntry:
     draw: int = 0
     goal_diff: int = 0
     direction: int = 0
-    history: list[str] = field(default_factory=list)
+    history: History = field(default_factory=History)
 
     @classmethod
     def from_dict(cls, data: dict[str, str | int]) -> TableEntry:
@@ -71,18 +78,18 @@ class TableEntry:
         self.points += 1
         self.draw += 1
         if not is_live:
-            self.history.insert(0, ResultSymbol.DRAW.value)
+            self.history.matches.insert(0, ResultSymbol.DRAW.value)
 
     def _update_after_lose(self, is_live: bool) -> None:
         self.lost += 1
         if not is_live:
-            self.history.insert(0, ResultSymbol.LOSE.value)
+            self.history.matches.insert(0, ResultSymbol.LOSE.value)
 
     def _update_after_win(self, is_live: bool) -> None:
         self.points += 3
         self.won += 1
         if not is_live:
-            self.history.insert(0, ResultSymbol.WIN.value)
+            self.history.matches.insert(0, ResultSymbol.WIN.value)
 
     def __lt__(self, other: TableEntry) -> bool:
         if self.points < other.points:
