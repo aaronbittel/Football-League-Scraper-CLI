@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from bundesliga_scraper.datatypes.constants import League, MatchResult
@@ -86,5 +86,10 @@ class FixtureEntry:
     def get_home_team(self) -> str:
         return self.home_team
 
-    def __str__(self) -> str:
-        return f"{self.home_team}${self.away_team}${self.home_goals}${self.away_goals}${self.matchday}${self.match_is_finished}${self.date}"
+    def __repr__(self) -> str:
+        result_str = (
+            f"{self.home_goals:>3}:{self.away_goals:<3}"
+            if self.match_is_finished
+            else " - : - "
+        )
+        return f"{self.home_team:>30}{result_str}{self.away_team}"

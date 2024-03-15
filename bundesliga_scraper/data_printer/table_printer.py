@@ -5,7 +5,8 @@ from rich.console import Console
 from rich.table import Table
 from rich.style import Style
 
-from bundesliga_scraper.datatypes.table_entry import TableEntry
+from bundesliga_scraper.datatypes.table_entry import TableEntry, StandingsDirection
+
 
 HEADER_STYLE = Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": Style(bold=False)}
@@ -52,7 +53,9 @@ def add_rows(
     for placement, entry in enumerate(table_entries, start=1):
         style = HIGHLIGHT_STYLE if entry.team_name in highlights else ""
         goal_diff = determine_goal_diff_color(entry.goal_diff)
-        placement = determine_placement_string(placement, entry.direction)
+        placement = determine_placement_string(
+            placement, entry.get_standings_direction().value
+        )
         table.add_row(
             str(placement),
             str(entry.team_name),
@@ -78,13 +81,9 @@ def determine_goal_diff_color(goal_diff: int) -> str:
     return colored_goal_diff
 
 
-def determine_placement_string(placement: int, direction: int) -> str:
-    if direction == 1:
-        if placement <= 9:
-            return f"{placement}  🔺"
-        return f"{placement} 🔺"
-    if direction == -1:
-        if placement <= 9:
-            return f"{placement}  🔻"
-        return f"{placement} 🔻"
-    return str(placement)
+def determine_placement_string(placement: int, directions_symbol: str) -> str:
+    return (
+        f"{placement}  {directions_symbol}"
+        if placement <= 9
+        else f"{placement} {directions_symbol}"
+    )

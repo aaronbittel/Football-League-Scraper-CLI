@@ -7,6 +7,9 @@ import requests
 from bundesliga_scraper.datatypes.constants import League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 from bundesliga_scraper.datatypes.table_entry import TableEntry
+from bundesliga_scraper.datatypes.table import Table
+
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
 
 BASE_URL = "https://api.openligadb.de"
 
@@ -52,6 +55,24 @@ def retrieve_current_matchday(league: League) -> int:
 
 def build_get_current_matchday_url(league: League) -> str:
     return f"{BASE_URL}/getcurrentgroup/{league}"
+
+
+def build_get_available_teams_url(league: League, season: int = 2023) -> str:
+    return f"{BASE_URL}/getavailableteams/{league}/{season}"
+
+
+def get_available_teams(league: League, season: int = 2023) -> dict:
+    url = build_get_available_teams_url(league=league, season=season)
+    response = requests.get(url, timeout=3)
+    return response.json()
+
+
+def initialize_league_table(league: League, season: int = 2023) -> Table:
+    data = get_available_teams(league=league, season=season)
+    teams_dict: dict[str, TableEntry] = {
+        entry["teamName"]: TableEntry(entry["teamName"]) for entry in data
+    }
+    return Table(league_name=LEAGUE_NAMES[league], teams=teams_dict)
 
 
 def main():
