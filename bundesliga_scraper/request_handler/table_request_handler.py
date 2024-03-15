@@ -38,6 +38,8 @@ def handle_table_request(args: Namespace) -> None:
     )
     all_fixtures = api.retrieve_all_fixtures(league)
     current_matchday = api.retrieve_current_matchday(league=league)
+    active_matchday = get_active_matchday(all_fixtures, current_matchday)
+
     matchday = current_matchday if args.matchday is None else args.matchday
 
     table_list_job_queue = []
@@ -49,20 +51,18 @@ def handle_table_request(args: Namespace) -> None:
         table_list_job_queue.append(create_second_round_job(league, current_matchday))
 
     if args.last:
-        table_list_job_queue.append(
-            create_last_job(args.last, league, current_matchday)
-        )
+        table_list_job_queue.append(create_last_job(args.last, league, active_matchday))
 
     if args.since:
         table_list_job_queue.append(
-            create_since_job(args.since, league, current_matchday)
+            create_since_job(args.since, league, active_matchday)
         )
 
     if args.home:
-        table_list_job_queue.append(create_home_job(league, current_matchday))
+        table_list_job_queue.append(create_home_job(league, active_matchday))
 
     if args.away:
-        table_list_job_queue.append(create_away_job(league, current_matchday))
+        table_list_job_queue.append(create_away_job(league, active_matchday))
 
     if args.matchday or not any(
         (
@@ -74,16 +74,9 @@ def handle_table_request(args: Namespace) -> None:
             args.away,
         )
     ):
-        # table_list = handle_table(
-        #     all_fixtures=all_fixtures,
-        #     matchday=matchday,
-        #     current_matchday=current_matchday,
-        # )
-        # table_printer.print_table_entries(
-        #     title=f"{LEAGUE_NAMES[league]} Table Matchday {matchday}",
-        #     table_list=table_list,
-        # )
-        table_list_job_queue.append(create_matchday_job(league, matchday))
+        table_list_job_queue.append(
+            create_matchday_job(league, matchday, active_matchday)
+        )
 
     for job in table_list_job_queue:
         title, selector, calculate = job["title"], job["selector"], job["func"]
@@ -93,33 +86,34 @@ def handle_table_request(args: Namespace) -> None:
         table_printer.print_table_entries(title, table_list, highlights)
 
 
-def create_matchday_job(league: League, matchday: int) -> dict:
-    selector = get_matchday_selector(matchday)
-    title = f"{LEAGUE_NAMES[league]} Table Matchday {matchday}"
+def create_matchday_job(league: League, matchday: int, active_matchday: int) -> dict:
+    selector = get_matchday_selector(matchday, active_matchday)
+    title = f"{LEAGUE_NAMES[league]} Table Matchday {active_matchday}"
     return {"title": title, "selector": selector, "func": calculate_table}
 
 
-def create_away_job(league: League, current_matchday: int) -> dict:
-    away_selector = get_away_selector(current_matchday)
+def create_away_job(league: League, active_matchday: int) -> dict:
+    away_selector = get_away_selector(active_matchday)
     title = f"{LEAGUE_NAMES[league]} Away Table"
     return {"title": title, "selector": away_selector, "func": calculate_away_table}
 
 
-def create_home_job(league: League, current_matchday: int) -> dict:
-    home_selector = get_home_selector(current_matchday)
+def create_home_job(league: League, active_matchday: int) -> dict:
+    home_selector = get_home_selector(active_matchday)
     title = f"{LEAGUE_NAMES[league]} Home Table"
     return {"title": title, "selector": home_selector, "func": calculate_home_table}
 
 
-def create_since_job(since: int, league: League, current_matchday: int) -> dict:
-    since_selector = get_since_selector(since, current_matchday)
+def create_since_job(since: int, league: League, active_matchday: int) -> dict:
+    since_selector = get_since_selector(since, active_matchday)
     title = f"{LEAGUE_NAMES[league]} Table Since Matchday {since}"
     return {"title": title, "selector": since_selector, "func": calculate_table}
 
 
-def create_last_job(last: int, league: League, current_matchday: int) -> dict:
-    last_selector = get_last_selector(last, current_matchday)
-    title = f"{LEAGUE_NAMES[league]} Table Last {last} Matches"
+def create_last_job(last: int, league: League, active_matchday: int) -> dict:
+    last_selector = get_last_selector(last, active_matchday)
+    number_of_matchdays = last if last <= active_matchday else active_matchday
+    title = f"{LEAGUE_NAMES[league]} Table Last {number_of_matchdays} Matches"
     return {"title": title, "selector": last_selector, "func": calculate_table}
 
 
@@ -174,31 +168,31 @@ def handle_table(
     return table_list
 
 
-def get_home_selector(current_matchday: int) -> FixtureSelector:
-    return FixtureSelector(to=current_matchday)
+def get_home_selector(active_matchday: int) -> FixtureSelector:
+    return FixtureSelector(to=active_matchday)
 
 
-def get_away_selector(current_matchday: int) -> FixtureSelector:
-    return FixtureSelector(to=current_matchday)
+def get_away_selector(active_matchday: int) -> FixtureSelector:
+    return FixtureSelector(to=active_matchday)
 
 
-def get_matchday_selector(matchday: int) -> FixtureSelector:
-    matchday = min(MAX_MATCHDAY, max(1, matchday))
+def get_matchday_selector(matchday: int, active_matchday: int) -> FixtureSelector:
+    matchday = min(active_matchday, max(1, matchday))
     return FixtureSelector(to=matchday, include_postponed_matches=False)
 
 
-def get_last_selector(n: int, current_matchday: int) -> FixtureSelector:
-    matchday = current_matchday - n + 1
+def get_last_selector(n: int, active_matchday: int) -> FixtureSelector:
+    matchday = active_matchday - n + 1
     if matchday < 1:
         matchday = 1
-    return FixtureSelector(from_=matchday, to=current_matchday)
+    return FixtureSelector(from_=matchday, to=active_matchday)
 
 
-def get_since_selector(since: int, current_matchday: int) -> FixtureSelector:
-    if since > current_matchday:
-        since = current_matchday
+def get_since_selector(since: int, active_matchday: int) -> FixtureSelector:
+    if since > active_matchday:
+        since = active_matchday
 
-    return FixtureSelector(from_=since, to=current_matchday)
+    return FixtureSelector(from_=since, to=active_matchday)
 
 
 def initialize_empty_table_entries_dict(
@@ -280,3 +274,13 @@ def index_of(entry: TableEntry, table_list: list[TableEntry]) -> int:
     for i, table_entry in enumerate(table_list):
         if table_entry.team_name == entry.team_name:
             return i
+
+
+def get_active_matchday(all_fixtures: list[FixtureEntry], current_matchday: int) -> int:
+    for fixture in all_fixtures:
+        if fixture.matchday != current_matchday:
+            continue
+        if fixture.match_is_finished or fixture.match_is_live:
+            return current_matchday
+        else:
+            return current_matchday - 1
