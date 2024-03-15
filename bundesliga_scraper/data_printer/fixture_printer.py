@@ -49,7 +49,7 @@ def print_fixture_entries(
             panel_content += f"{kickoff_time}\n"
             is_live = any(fixture.match_is_live for fixture in fixtures)
             if is_live:
-                panel_content = panel_content[:-1] + "🔴 LIVE\n"
+                panel_content = panel_content[:-1] + 45 * " " + "🔴 LIVE\n"
             panel_content += "\n".join(
                 get_fixture_text(fixture, highlights) for fixture in fixtures
             )

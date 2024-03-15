@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.style import Style
 
-from bundesliga_scraper.datatypes.table_entry import TableEntry, StandingsDirection
+from bundesliga_scraper.datatypes.table_entry import TableEntry
 
 
 HEADER_STYLE = Style(bold=False)
@@ -66,7 +66,7 @@ def add_rows(
             f"{entry.goals}:{entry.opponent_goals}",
             goal_diff,
             str(entry.points),
-            "".join(entry.history.matches[:5]),
+            "".join(entry.history.matches[:-6:-1]),
             style=style,
         )
 

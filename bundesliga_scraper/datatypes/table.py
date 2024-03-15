@@ -17,6 +17,8 @@ class Table:
     ) -> list[Table]:
         for matchday in matchdays:
             for fixture in matchday.fixtures:
+                if not fixture.match_is_finished and not fixture.match_is_live:
+                    continue
                 if home:
                     self.teams[fixture.home_team].update(fixture)
                 if away:
