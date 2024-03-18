@@ -66,6 +66,7 @@ def add_rows(
             f"{entry.goals}:{entry.opponent_goals}",
             goal_diff,
             str(entry.points),
+            # gets the results of the last 5 matches in reversed order
             "".join(entry.history.matches[:-6:-1]),
             style=style,
         )

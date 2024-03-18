@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from bundesliga_scraper.datatypes.constants import League, MatchResult
 
 
-@dataclass
+@dataclass(frozen=True)
 class FixtureEntry:
     """Class that represents a fixture entry of a given matchday."""
 
@@ -89,7 +89,7 @@ class FixtureEntry:
     def __repr__(self) -> str:
         result_str = (
             f"{self.home_goals:>3}:{self.away_goals:<3}"
-            if self.match_is_finished
+            if self.match_is_finished or self.match_is_live
             else " - : - "
         )
         return f"{self.home_team:>30}{result_str}{self.away_team}"

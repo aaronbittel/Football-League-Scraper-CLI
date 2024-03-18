@@ -24,7 +24,7 @@ def handle_fixture_request(args: Namespace) -> None:
         else api.League.Bundesliga_2
     )
 
-    fixture_entries = api.retrieve_all_fixtures(league=league)
+    season_matchdays = api.retrieve_all_matchdays(league=league)
 
     matchday = args.matchday
 
@@ -34,18 +34,11 @@ def handle_fixture_request(args: Namespace) -> None:
         matchday = api.retrieve_current_matchday(league) + effective_count
         matchday = min(MAX_MATCHDAY, max(1, matchday))
 
-    total = 0
-    matchday_fixtures: list[FixtureEntry] = []
-    for fixture in fixture_entries:
-        if fixture.matchday == matchday:
-            matchday_fixtures.append(fixture)
-            total += 1
-            if total == 9:
-                break
+    matchday = season_matchdays[matchday - 1]
 
-    title = f"{LEAGUE_NAMES[league]} Fixture {matchday_fixtures[0].matchday}"
+    title = f"{LEAGUE_NAMES[league]} Fixture {matchday.matchday}"
     highlights = [] if args.highlights is None else args.highlights
 
     fixture_printer.print_fixture_entries(
-        title=title, matchday_fixtures=matchday_fixtures, highlights=highlights
+        title=title, matchday=matchday, highlights=highlights
     )

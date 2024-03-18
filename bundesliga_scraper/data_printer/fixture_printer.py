@@ -8,6 +8,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from bundesliga_scraper.datatypes.matchday import Matchday
 
 WINNING_STYLE = "[bold pale_green3]"
 WINNING_STYLE_END = f"[/{WINNING_STYLE[1:]}"
@@ -18,7 +19,7 @@ WIDTH = 62
 MATCH_SEPERATOR = " : "
 FUTURE_MATCH_SEPERATOR = " - : - "
 NAME_SPACE = (WIDTH - len(MATCH_SEPERATOR)) // 2
-NAME_SPACE_2 = (WIDTH - len(FUTURE_MATCH_SEPERATOR)) // 2
+FUTURE_GAME_SPACE = (WIDTH - len(FUTURE_MATCH_SEPERATOR)) // 2
 
 
 def get_fixture_text(fixture: FixtureEntry, highlights: list[str]) -> str:
@@ -27,7 +28,7 @@ def get_fixture_text(fixture: FixtureEntry, highlights: list[str]) -> str:
         away_string = get_away_team_styled_string(fixture)
         match_string = f"{home_string}{MATCH_SEPERATOR}{away_string}"
     else:
-        match_string = f"{fixture.home_team.rjust(NAME_SPACE_2)}{FUTURE_MATCH_SEPERATOR}{fixture.away_team.ljust(NAME_SPACE_2)}"
+        match_string = f"{fixture.home_team.rjust(FUTURE_GAME_SPACE)}{FUTURE_MATCH_SEPERATOR}{fixture.away_team.ljust(FUTURE_GAME_SPACE)}"
 
     if fixture.home_team in highlights or fixture.away_team in highlights:
         return f"{HIGHLIGHT_STYLE}{match_string}{HIGHLIGHT_STYLE_END}"
@@ -36,14 +37,14 @@ def get_fixture_text(fixture: FixtureEntry, highlights: list[str]) -> str:
 
 
 def print_fixture_entries(
-    title: str, matchday_fixtures: list[FixtureEntry], highlights: list[str]
+    title: str, matchday: Matchday, highlights: list[str]
 ) -> None:
     console = Console()
-    fixture_weekdays_split = split_fixture_into_weekdays(matchday_fixtures)
+    matchday_weekdays_split = matchday.split_fixture_into_weekdays()
 
     print_title(console, title)
 
-    for weekday_date, kickoff_times in fixture_weekdays_split.items():
+    for weekday_date, kickoff_times in matchday_weekdays_split.items():
         panel_content = ""
         for kickoff_time, fixtures in kickoff_times.items():
             panel_content += f"{kickoff_time}\n"

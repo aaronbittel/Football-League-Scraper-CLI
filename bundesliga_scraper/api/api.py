@@ -4,12 +4,11 @@ from datetime import datetime
 
 import requests
 
-from bundesliga_scraper.datatypes.constants import League
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
-from bundesliga_scraper.datatypes.table_entry import TableEntry
+from bundesliga_scraper.datatypes.matchday import Matchday
 from bundesliga_scraper.datatypes.table import Table
-
-from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
+from bundesliga_scraper.datatypes.table_entry import TableEntry
 
 BASE_URL = "https://api.openligadb.de"
 
@@ -30,10 +29,14 @@ def retrieve_table(league: League, season: int = 2023) -> list[TableEntry]:
     return [TableEntry.from_dict(table_entry) for table_entry in data]
 
 
-def retrieve_all_fixtures(league: League, season: int = 2023) -> list[FixtureEntry]:
+def retrieve_all_matchdays(league: League, season: int = 2023) -> list[Matchday]:
     all_fixtures_list = get_match_data(league=league, season=season)
 
-    return [FixtureEntry.from_dict(fixture_data) for fixture_data in all_fixtures_list]
+    all_fixtures = [
+        FixtureEntry.from_dict(fixture_data) for fixture_data in all_fixtures_list
+    ]
+
+    return _extract_season_matchdays(all_fixtures)
 
 
 def get_match_data(league: League, season: int = 2023) -> dict:
@@ -75,8 +78,19 @@ def initialize_league_table(league: League, season: int = 2023) -> Table:
     return Table(league_name=LEAGUE_NAMES[league], teams=teams_dict)
 
 
+def _extract_season_matchdays(all_fixtures: list[FixtureEntry]) -> list[Matchday]:
+    season_matchdays: list[Matchday] = []
+    for i in range(1, 35):
+        season_matchdays.append(Matchday(matchday=i, fixtures=[]))
+    for fixture in all_fixtures:
+        matchday = fixture.matchday
+        season_matchdays[matchday - 1].fixtures.append(fixture)
+
+    return season_matchdays
+
+
 def main():
-    all_fixtures = retrieve_all_fixtures(league=League.Bundesliga)
+    all_fixtures = retrieve_all_matchdays(league=League.Bundesliga)
     matchday = all_fixtures[23]
 
     print(f"Matchday: {matchday[0].matchday}")

@@ -7,7 +7,7 @@ from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry, Matchday
 from bundesliga_scraper.datatypes.table_entry import Table, TableEntry
 
 table: Table = api.initialize_league_table(League.Bundesliga)
-all_fixtures: list[FixtureEntry] = api.retrieve_all_fixtures(League.Bundesliga)
+all_fixtures: list[FixtureEntry] = api.retrieve_all_matchdays(League.Bundesliga)
 all_matchdays: list[Matchday] = [
     Matchday(matchday=matchday, fixtures=fixtures)
     for matchday, fixtures in enumerate(batched(all_fixtures, 9), start=1)

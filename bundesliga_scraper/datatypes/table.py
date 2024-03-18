@@ -14,7 +14,7 @@ class Table:
 
     def calculate_table(
         self, matchdays: list[Matchday], home: bool = True, away: bool = True
-    ) -> list[Table]:
+    ) -> None:
         for matchday in matchdays:
             for fixture in matchday.fixtures:
                 if not fixture.match_is_finished and not fixture.match_is_live:
@@ -24,11 +24,11 @@ class Table:
                 if away:
                     self.teams[fixture.away_team].update(fixture)
 
-            self.update_teams_history()
+            self._update_teams_history()
 
         self.matchday = max(team.matches for team in self.teams.values())
 
-    def update_teams_history(self):
+    def _update_teams_history(self):
         self._sort()
         for pl, table_entry in enumerate(self.standings, start=1):
             self.teams[table_entry.team_name].history.placements.append(pl)
