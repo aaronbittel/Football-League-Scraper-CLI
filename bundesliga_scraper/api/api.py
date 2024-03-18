@@ -39,14 +39,25 @@ def retrieve_all_matchdays(league: League, season: int = 2023) -> list[Matchday]
     return _extract_season_matchdays(all_fixtures)
 
 
-def get_match_data(league: League, season: int = 2023) -> dict:
-    url = build_get_match_data_url(league=league, season=season)
+def get_match_data(league: League, season: int = 2023, team_filter: str = "") -> dict:
+    url = build_get_match_data_url(
+        league=league, season=season, team_filter=team_filter
+    )
     response = requests.get(url, timeout=3)
     return response.json()
 
 
-def build_get_match_data_url(league: League, season: int = 2023) -> str:
-    return f"{BASE_URL}/getmatchdata/{league}/{season}"
+def build_get_match_data_url(
+    league: League, season: int = 2023, team_filter: str = ""
+) -> str:
+    return f"{BASE_URL}/getmatchdata/{league}/{season}/{team_filter}"
+
+
+def retrieve_match_data_team(
+    league: League, team: str, season: int = 2023
+) -> list[FixtureEntry]:
+    team_data = get_match_data(league=league, team_filter=team, season=season)
+    return [FixtureEntry.from_dict(fixture) for fixture in team_data]
 
 
 def retrieve_current_matchday(league: League) -> int:

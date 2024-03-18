@@ -11,6 +11,8 @@ from bundesliga_scraper.request_handler.fixture_request_handler import (
     handle_fixture_request,
 )
 
+from bundesliga_scraper.request_handler.team_request_handler import handle_team_request
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Creating the parser object and adding its arguments.
@@ -145,6 +147,14 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     fixture_parser.set_defaults(func=handle_fixture_request)
+
+    team_parser = subparsers.add_parser("team", help="team help")
+    team_parser.add_argument(
+        "team_name",
+        nargs=1,
+        help="Select a team of a league to get information specificly about that team.",
+    )
+    team_parser.set_defaults(func=handle_team_request)
     return parser
 
 
