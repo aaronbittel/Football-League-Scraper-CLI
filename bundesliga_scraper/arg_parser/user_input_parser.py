@@ -154,6 +154,27 @@ def create_parser() -> argparse.ArgumentParser:
         nargs=1,
         help="Select a team of a league to get information specificly about that team.",
     )
+
+    team_parser.add_argument(
+        "--next",
+        "-n",
+        const=5,
+        nargs="?",
+        type=int,
+        dest="next",
+        help="Display the next [given] matchdays for the team, defaults to 5.",
+    )
+
+    team_parser.add_argument(
+        "--prev",
+        "-p",
+        const=5,
+        nargs="?",
+        type=int,
+        dest="prev",
+        help="Display the previous [given] matchdays for the team, defaults to 5.",
+    )
+
     team_parser.set_defaults(func=handle_team_request)
     return parser
 

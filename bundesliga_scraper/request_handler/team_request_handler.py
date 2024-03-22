@@ -10,6 +10,9 @@ from bundesliga_scraper.data_printer.fixture_printer import print_fixture_entrie
 def handle_team_request(args: Namespace) -> None:
     team: str = args.team_name[0]
 
+    future_games = 2 if args.next is None else args.next
+    previous_games = 3 if args.prev is None else args.prev
+
     league: League = (
         League.Bundesliga
         if args.league.lower() == "bundesliga"
@@ -19,18 +22,22 @@ def handle_team_request(args: Namespace) -> None:
         league=league, team=team
     )
 
-    last_played_matchday = 0
-    for i, fixture in enumerate(team_fixture_entries):
-        if not fixture.match_is_finished:
-            last_played_matchday = i
-            break
-    print(last_played_matchday)
+    last_played_matchday_index = get_last_played_matchday_index(team_fixture_entries)
+    print(last_played_matchday_index)
+
+    from_ = last_played_matchday_index - previous_games
+    to = last_played_matchday_index + future_games
 
     title = f"{team} Fixtures & Results"
     matches = Matchday(
         matchday=0,
-        fixtures=team_fixture_entries[
-            last_played_matchday - 3 : last_played_matchday + 2
-        ],
+        fixtures=team_fixture_entries[from_:to],
     )
     print_fixture_entries(title=title, matchday=matches, highlights=[])
+
+
+def get_last_played_matchday_index(team_fixture_entries):
+    for i, fixture in enumerate(team_fixture_entries):
+        if not fixture.match_is_finished:
+            return i
+    return 0
