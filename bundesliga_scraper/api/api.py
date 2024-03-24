@@ -53,7 +53,7 @@ def build_get_match_data_url(
     return f"{BASE_URL}/getmatchdata/{league}/{season}/{team_filter}"
 
 
-def retrieve_match_data_team(
+def retrieve_team_match_data(
     league: League, team: str, season: int = 2023
 ) -> list[FixtureEntry]:
     team_data = get_match_data(league=league, team_filter=team, season=season)
