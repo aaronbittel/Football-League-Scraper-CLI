@@ -1,8 +1,5 @@
 """Creating colorful strings of matchday fixture information."""
 
-from collections import defaultdict
-from datetime import datetime
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -22,7 +19,7 @@ NAME_SPACE = (WIDTH - len(MATCH_SEPERATOR)) // 2
 FUTURE_GAME_SPACE = (WIDTH - len(FUTURE_MATCH_SEPERATOR)) // 2
 
 
-def get_fixture_text(fixture: FixtureEntry, highlights: list[str]) -> str:
+def get_fixture_string(fixture: FixtureEntry, highlights: list[str]) -> str:
     if fixture.match_is_finished or fixture.match_is_live:
         home_string = get_home_team_styled_string(fixture)
         away_string = get_away_team_styled_string(fixture)
@@ -45,15 +42,7 @@ def print_fixture_entries(
     print_title(console, title)
 
     for weekday_date, kickoff_times in matchday_weekdays_split.items():
-        panel_content = ""
-        for kickoff_time, fixtures in kickoff_times.items():
-            panel_content += f"{kickoff_time}\n"
-            is_live = any(fixture.match_is_live for fixture in fixtures)
-            if is_live:
-                panel_content = panel_content[:-1] + 45 * " " + "🔴 LIVE\n"
-            panel_content += "\n".join(
-                get_fixture_text(fixture, highlights) for fixture in fixtures
-            )
+        panel_content = get_panel_content(highlights, kickoff_times)
 
         console.print(
             Panel(
@@ -65,22 +54,25 @@ def print_fixture_entries(
         )
 
 
+def get_panel_content(
+    highlights: list[str], kickoff_times: dict[str, list[FixtureEntry]]
+) -> str:
+    panel_content = ""
+    for kickoff_time, fixtures in kickoff_times.items():
+        panel_content += f"{kickoff_time}\n"
+        is_live = any(fixture.match_is_live for fixture in fixtures)
+        if is_live:
+            panel_content = panel_content[:-1] + 45 * " " + "🔴 LIVE\n"
+        panel_content += "\n".join(
+            get_fixture_string(fixture, highlights) for fixture in fixtures
+        )
+
+    return panel_content
+
+
 def print_title(console: Console, title: str) -> None:
     leftspace = (WIDTH - len(title)) // 2
     console.print(Text(leftspace * " ") + Text(f"{title}\n", style="bold italic"))
-
-
-def split_fixture_into_weekdays(
-    fixture_entries: list[FixtureEntry],
-) -> defaultdict[datetime, list[FixtureEntry]]:
-    matchday_split = defaultdict(lambda: defaultdict(list))
-
-    for fixture in fixture_entries:
-        matchday_split[fixture.date.date()][fixture.date.strftime(r"%H:%M")].append(
-            fixture
-        )
-
-    return matchday_split
 
 
 def get_home_string(fixture: FixtureEntry) -> str:
