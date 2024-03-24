@@ -175,6 +175,14 @@ def create_parser() -> argparse.ArgumentParser:
         help="Display the previous [given] matchdays for the team, defaults to 5.",
     )
 
+    team_parser.add_argument(
+        "--all",
+        "-a",
+        action="store_true",
+        dest="all",
+        help="Display all results and fixtures of the specified team.",
+    )
+
     team_parser.set_defaults(func=handle_team_request)
     return parser
 
