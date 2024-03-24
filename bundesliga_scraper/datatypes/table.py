@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 
 from bundesliga_scraper.datatypes.matchday import Matchday
@@ -36,3 +37,6 @@ class Table:
 
     def _sort(self) -> None:
         self.standings = sorted(self.teams.values(), reverse=True)
+
+    def copy(self) -> Table:
+        return copy.deepcopy(self)
