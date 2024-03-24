@@ -43,14 +43,14 @@ def handle_table_request(args: Namespace) -> None:
         if args.league == "bundesliga"
         else api.League.Bundesliga_2
     )
+
     season_matchdays = api.retrieve_all_matchdays(league)
-
     current_matchday = api.retrieve_current_matchday(league)
-    active_matchday = get_active_matchday(season_matchdays[current_matchday - 1])
+    empty_table: Table = api.initialize_league_table(league=league)
 
+    active_matchday = get_active_matchday(season_matchdays[current_matchday - 1])
     table_request_job_queue = create_job_queue(args, active_matchday)
 
-    empty_table: Table = api.initialize_league_table(league=league)
     for job in table_request_job_queue:
         handle_job(
             league=league,
