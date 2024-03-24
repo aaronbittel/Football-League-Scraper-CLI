@@ -7,7 +7,6 @@ from argparse import Namespace
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
 from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
 
 MAX_MATCHDAY = 34
 
