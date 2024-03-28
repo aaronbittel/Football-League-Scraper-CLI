@@ -10,6 +10,7 @@ from bundesliga_scraper.data_printer import table_printer
 from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.matchday import Matchday
 from bundesliga_scraper.datatypes.table import Table
+from bundesliga_scraper.request_handler.utils import FIRST_ROUND_MATCHDAY, get_league
 
 
 @dataclass(frozen=True)
@@ -27,10 +28,6 @@ class TableRequestJob:
     matchday_selctor: MatchdaySelector
 
 
-FIRST_ROUND_MATCHDAY = 17
-MAX_MATCHDAY = 34
-
-
 def handle_table_request(args: Namespace) -> None:
     """Handles the table request.
 
@@ -38,11 +35,7 @@ def handle_table_request(args: Namespace) -> None:
         args (Namespace): user arguments
     """
 
-    league = (
-        api.League.Bundesliga
-        if args.league == "bundesliga"
-        else api.League.Bundesliga_2
-    )
+    league = get_league(args.league)
 
     season_matchdays = api.retrieve_all_matchdays(league)
     current_matchday = api.retrieve_current_matchday(league)

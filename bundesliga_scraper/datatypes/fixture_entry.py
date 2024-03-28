@@ -83,13 +83,17 @@ class FixtureEntry:
             return MatchResult.AWAY_WON
         return MatchResult.DRAW
 
+    def is_in_future(self):
+        return not self.match_is_finished and not self.match_is_live
+
     def get_home_team(self) -> str:
         return self.home_team
 
     def __repr__(self) -> str:
-        result_str = (
-            f"{self.home_goals:>3}:{self.away_goals:<3}"
-            if self.match_is_finished or self.match_is_live
-            else " - : - "
-        )
-        return f"{self.home_team:>30}{result_str}{self.away_team}"
+        return f"{self.home_team} : {self.away_team}"
+        # result_str = (
+        #     f"{self.home_goals:>3}:{self.away_goals:<3}"
+        #     if self.match_is_finished or self.match_is_live
+        #     else " - : - "
+        # )
+        # return f"{self.home_team:>30}{result_str}{self.away_team}"

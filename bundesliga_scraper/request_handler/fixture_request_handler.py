@@ -7,8 +7,20 @@ from argparse import Namespace
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import fixture_printer
 from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
+from bundesliga_scraper.datatypes.matchday import Matchday
+from bundesliga_scraper.request_handler.utils import MAX_MATCHDAY, get_league
+from dataclasses import dataclass
 
-MAX_MATCHDAY = 34
+
+TITLE_TEMPLATE = "{} Fixture {}"
+
+
+@dataclass(frozen=True)
+class MatchdaySelectionParams:
+    nxt: int
+    prev: int
+    user_matchday: int
+    current_matchday: int
 
 
 def handle_fixture_request(args: Namespace) -> None:
@@ -17,27 +29,39 @@ def handle_fixture_request(args: Namespace) -> None:
     Args:
         args (Namespace): user arguments
     """
-    league = (
-        api.League.Bundesliga
-        if args.league == "bundesliga"
-        else api.League.Bundesliga_2
-    )
+    league = get_league(args.league)
 
     season_matchdays = api.retrieve_all_matchdays(league=league)
+    current_matchday = api.retrieve_current_matchday(league)
 
-    matchday = args.matchday
+    matchday_selection_params = MatchdaySelectionParams(
+        nxt=args.next,
+        prev=args.prev,
+        user_matchday=args.matchday,
+        current_matchday=current_matchday,
+    )
+    selected_matchday = get_selected_matchday_games(
+        matchday_selection_params, season_matchdays
+    )
 
-    # user did not provide a matchday -> get current
-    if matchday is None:
-        effective_count = args.next - args.prev
-        matchday = api.retrieve_current_matchday(league) + effective_count
-        matchday = min(MAX_MATCHDAY, max(1, matchday))
-
-    matchday = season_matchdays[matchday - 1]
-
-    title = f"{LEAGUE_NAMES[league]} Fixture {matchday.matchday}"
+    title = TITLE_TEMPLATE.format(LEAGUE_NAMES[league], selected_matchday.matchday)
     highlights = [] if args.highlights is None else args.highlights
 
     fixture_printer.print_fixture_entries(
-        title=title, matchday=matchday, highlights=highlights
+        title=title, matchday=selected_matchday, highlights=highlights
     )
+
+
+def get_selected_matchday_games(
+    params: MatchdaySelectionParams, season_matchdays: list[Matchday]
+) -> Matchday:
+    matchday = get_matchday(params)
+    return season_matchdays[matchday - 1]
+
+
+def get_matchday(params: MatchdaySelectionParams) -> int:
+    # user did not provide a matchday -> get current
+    if params.user_matchday is None:
+        effective_count = params.nxt - params.prev
+        matchday = params.current_matchday + effective_count
+    return min(MAX_MATCHDAY, max(1, matchday))
