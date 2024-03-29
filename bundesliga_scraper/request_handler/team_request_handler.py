@@ -4,6 +4,10 @@ from dataclasses import dataclass
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer.team_printer import print_team_entries
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+<<<<<<< HEAD
+=======
+from bundesliga_scraper.datatypes.matchday import Matchday
+>>>>>>> aecddceae48e985d3fc1d997cfeea7f823517ded
 from bundesliga_scraper.datatypes.team import TeamSeasonMatches
 from bundesliga_scraper.request_handler.utils import MAX_MATCHDAY, get_league
 
