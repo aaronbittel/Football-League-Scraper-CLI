@@ -1,7 +1,5 @@
 """Parsing the users input."""
 
-# from __future__ import annotations
-
 from argparse import ArgumentParser
 
 from bundesliga_scraper.request_handler.fixture_request_handler import (

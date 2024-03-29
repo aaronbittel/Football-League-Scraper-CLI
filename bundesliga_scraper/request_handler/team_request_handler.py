@@ -1,41 +1,63 @@
 from argparse import Namespace
+from dataclasses import dataclass
 
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer.team_printer import print_team_entries
-from bundesliga_scraper.datatypes.constants import League
 from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
-from bundesliga_scraper.datatypes.matchday import Matchday
+from bundesliga_scraper.datatypes.team import TeamSeasonMatches
+from bundesliga_scraper.request_handler.utils import MAX_MATCHDAY, get_league
+
+TITLE_TEMPLATE = "{} Fixtures & Results"
+FUTURE_GAMES_COUNT = 3
+PREVOUS_GAMES_COUNT = 2
+
+
+@dataclass(frozen=True)
+class TeamRequestParams:
+    next_: int
+    prev: int
+    all_: bool
+    last_played_matchday_index: int
 
 
 def handle_team_request(args: Namespace) -> None:
     team: str = args.team_name[0]
 
-    league = (
-        League.Bundesliga
-        if args.league.lower() == "bundesliga"
-        else League.Bundesliga_2
-    )
-
-    future_games = 3 if args.next is None else args.next
-    previous_games = 2 if args.prev is None else args.prev
+    league = get_league(args.league)
 
     team_fixture_entries = api.retrieve_team_match_data(league=league, team=team)
 
     last_played_matchday_index = get_last_played_matchday_index(team_fixture_entries)
 
-    if args.all:
-        from_ = 0
-        to = 34
-    else:
-        from_ = last_played_matchday_index - previous_games
-        to = last_played_matchday_index + future_games
-
-    title = f"{team} Fixtures & Results"
-    matches = Matchday(
-        matchday=0,
-        fixtures=team_fixture_entries[from_:to],
+    team_request_params = TeamRequestParams(
+        next_=args.next,
+        prev=args.prev,
+        all_=args.all,
+        last_played_matchday_index=last_played_matchday_index,
     )
-    print_team_entries(title, matches)
+
+    from_, to = get_matchday_range(team_request_params)
+
+    selected_team_matches = TeamSeasonMatches(
+        team_name=team,
+        results=team_fixture_entries[from_:last_played_matchday_index],
+        fixtures=team_fixture_entries[last_played_matchday_index:to],
+    )
+    title = TITLE_TEMPLATE.format(team)
+    print_team_entries(title, selected_team_matches)
+
+
+def get_matchday_range(params: TeamRequestParams):
+    previous_games = PREVOUS_GAMES_COUNT if params.prev is None else params.prev
+    future_games = FUTURE_GAMES_COUNT if params.next_ is None else params.next_
+
+    if params.all_:
+        from_ = 0
+        to = MAX_MATCHDAY
+    else:
+        from_ = params.last_played_matchday_index - previous_games
+        to = params.last_played_matchday_index + future_games
+    return from_, to
 
 
 def get_last_played_matchday_index(team_fixture_entries: list[FixtureEntry]):

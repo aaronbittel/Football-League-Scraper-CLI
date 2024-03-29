@@ -14,7 +14,7 @@ HIGHLIGHT_STYLE = "white on orange3"
 
 
 def print_table_entries(
-    title: int, table_list: list[TableEntry], highlights: list[str]
+    title: str, table_list: list[TableEntry], highlights: list[str]
 ) -> None:
     print()
     table = create_table(title)
@@ -24,7 +24,7 @@ def print_table_entries(
     console.print(table)
 
 
-def create_table(title: int) -> None:
+def create_table(title: str, last_5: bool = True) -> Table:
     table = Table(
         title=title,
         box=ROUNDED,
@@ -42,34 +42,56 @@ def create_table(title: int) -> None:
     table.add_column(
         "Points", justify="center", header_style=HEADER_STYLE, style=Style(bold=True)
     )
-    table.add_column("Last 5", **DEFAULT_COLUMN_SETTINGS)
+    if last_5:
+        table.add_column("Last 5", **DEFAULT_COLUMN_SETTINGS)
 
     return table
 
 
 def add_rows(
-    table: Table, table_entries: list[TableEntry], highlights: list[str]
+    table: Table,
+    table_entries: list[TableEntry],
+    highlights: list[str],
+    place: int = None,
 ) -> None:
     for placement, entry in enumerate(table_entries, start=1):
-        style = HIGHLIGHT_STYLE if entry.team_name in highlights else ""
+        if place is not None and not (place - 2 <= placement <= place + 3):
+            continue
+        for highlight in highlights:
+            style = HIGHLIGHT_STYLE if highlight in entry.team_name else ""
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(
             placement, entry.get_standings_direction().value
         )
-        table.add_row(
-            str(placement),
-            str(entry.team_name),
-            str(entry.matches),
-            str(entry.won),
-            str(entry.draw),
-            str(entry.lost),
-            f"{entry.goals}:{entry.opponent_goals}",
-            goal_diff,
-            str(entry.points),
-            # gets the results of the last 5 matches in reversed order
-            "".join(entry.history.matches[:-6:-1]),
-            style=style,
-        )
+
+        if place is None:
+            table.add_row(
+                str(placement),
+                str(entry.team_name),
+                str(entry.matches),
+                str(entry.won),
+                str(entry.draw),
+                str(entry.lost),
+                f"{entry.goals}:{entry.opponent_goals}",
+                goal_diff,
+                str(entry.points),
+                # gets the results of the last 5 matches in reversed order
+                "".join(entry.history.matches[:-6:-1]),
+                style=style,
+            )
+        else:
+            table.add_row(
+                str(placement),
+                str(entry.team_name),
+                str(entry.matches),
+                str(entry.won),
+                str(entry.draw),
+                str(entry.lost),
+                f"{entry.goals}:{entry.opponent_goals}",
+                goal_diff,
+                str(entry.points),
+                style=style,
+            )
 
 
 def determine_goal_diff_color(goal_diff: int) -> str:

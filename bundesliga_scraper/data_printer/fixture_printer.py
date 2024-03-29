@@ -9,6 +9,10 @@ from bundesliga_scraper.datatypes.matchday import Matchday
 
 WINNING_STYLE = "[bold pale_green3]"
 WINNING_STYLE_END = f"[/{WINNING_STYLE[1:]}"
+LOSING_STYLE = "[bold red]"
+LOSING_STYLE_END = f"[/{LOSING_STYLE[1:]}"
+NEUTRAL_STYLE = "[bold pale_turquoise4]"
+NEUTRAL_STYLE_END = f"[/{NEUTRAL_STYLE[1:]}"
 HIGHLIGHT_STYLE = "[on orange3]"
 HIGHLIGHT_STYLE_END = f"[/{HIGHLIGHT_STYLE[1:]}"
 
