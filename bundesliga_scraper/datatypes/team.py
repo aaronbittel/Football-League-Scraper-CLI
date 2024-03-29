@@ -12,29 +12,17 @@ class TeamSeasonMatches:
     def team_won_match(self, fixture: FixtureEntry) -> bool:
         self.check_valid_fixture(fixture)
 
-<<<<<<< HEAD
         if self.team_name in fixture.home_team and fixture.home_team_won():
             return True
         if self.team_name in fixture.away_team and fixture.away_team_won():
-=======
-        if fixture.home_team == self.team_name and fixture.home_team_won():
-            return True
-        if fixture.away_team == self.team_name and fixture.away_team_won():
->>>>>>> aecddceae48e985d3fc1d997cfeea7f823517ded
             return True
         return False
 
     def team_lost_match(self, fixture: FixtureEntry) -> bool:
         self.check_valid_fixture(fixture)
-<<<<<<< HEAD
         if self.team_name in fixture.home_team and fixture.away_team_won():
             return True
         if self.team_name in fixture.away_team and fixture.home_team_won():
-=======
-        if fixture.home_team == self.team_name and fixture.away_team_won():
-            return True
-        if fixture.away_team == self.team_name and fixture.home_team_won():
->>>>>>> aecddceae48e985d3fc1d997cfeea7f823517ded
             return True
         return False
 
