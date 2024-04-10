@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import requests
-=======
-from datetime import datetime
->>>>>>> aecddceae48e985d3fc1d997cfeea7f823517ded
 from rich.console import Console
 from rich.panel import Panel
 from rich.columns import Columns
@@ -24,9 +20,6 @@ from bundesliga_scraper.datatypes.team import TeamSeasonMatches
 
 def print_team_entries(title: str, selected_team_matches: TeamSeasonMatches) -> None:
     console = Console()
-    layout = create_layout()
-
-    print(selected_team_matches)
 
     results_panel_content = get_results_string(selected_team_matches)
 

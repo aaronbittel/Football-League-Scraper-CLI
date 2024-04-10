@@ -90,10 +90,9 @@ class FixtureEntry:
         return self.home_team
 
     def __repr__(self) -> str:
-        return f"{self.home_team} : {self.away_team}"
-        # result_str = (
-        #     f"{self.home_goals:>3}:{self.away_goals:<3}"
-        #     if self.match_is_finished or self.match_is_live
-        #     else " - : - "
-        # )
-        # return f"{self.home_team:>30}{result_str}{self.away_team}"
+        result_str = (
+            f"{self.home_goals:>3}:{self.away_goals:<3}"
+            if self.match_is_finished or self.match_is_live
+            else " - : - "
+        )
+        return f"{self.home_team:>30}{result_str}{self.away_team}"

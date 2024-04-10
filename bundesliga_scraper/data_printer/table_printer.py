@@ -55,6 +55,7 @@ def add_rows(
     place: int = None,
 ) -> None:
     for placement, entry in enumerate(table_entries, start=1):
+        style = ""
         if place is not None and not (place - 2 <= placement <= place + 3):
             continue
         for highlight in highlights:
