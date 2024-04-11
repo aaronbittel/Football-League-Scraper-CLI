@@ -44,7 +44,7 @@ def handle_team_request(args: Namespace) -> None:
         fixtures=team_fixture_entries[last_played_matchday_index:to],
     )
     title = TITLE_TEMPLATE.format(team)
-    print_team_entries(title, selected_team_matches)
+    print_team_entries(league, title, selected_team_matches)
 
 
 def get_matchday_range(params: TeamRequestParams):

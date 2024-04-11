@@ -1,4 +1,5 @@
 import requests
+from bundesliga_scraper.datatypes.constants import League
 from rich.console import Console
 from rich.panel import Panel
 from rich.columns import Columns
@@ -18,7 +19,9 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 from bundesliga_scraper.datatypes.team import TeamSeasonMatches
 
 
-def print_team_entries(title: str, selected_team_matches: TeamSeasonMatches) -> None:
+def print_team_entries(
+    league: League, title: str, selected_team_matches: TeamSeasonMatches
+) -> None:
     console = Console()
 
     results_panel_content = get_results_string(selected_team_matches)
@@ -32,7 +35,7 @@ def print_team_entries(title: str, selected_team_matches: TeamSeasonMatches) -> 
         renderable=fixtures_panel_content, title="Fixtures", padding=1
     )
 
-    table = do_table(selected_team_matches.team_name)
+    table = do_table(league, selected_team_matches.team_name)
 
     height_diff = results_panel_content.count("\n") - fixtures_panel_content.count("\n")
     if height_diff > 0:
@@ -47,9 +50,9 @@ def print_team_entries(title: str, selected_team_matches: TeamSeasonMatches) -> 
     console.print(columns, justify="center")
 
 
-def do_table(team_name: str):
+def do_table(league: League, team_name: str):
     table_data = requests.get(
-        "https://api.openligadb.de/getbltable/bl1/2023", timeout=3
+        f"https://api.openligadb.de/getbltable/{league}/2023", timeout=3
     ).json()
     table_entries = [TableEntry.from_dict(entry) for entry in table_data]
     table_entries.sort(reverse=True)

@@ -58,8 +58,8 @@ def add_rows(
         style = ""
         if place is not None and not (place - 2 <= placement <= place + 3):
             continue
-        for highlight in highlights:
-            style = HIGHLIGHT_STYLE if highlight in entry.team_name else ""
+        if any(highlight in entry.team_name for highlight in highlights):
+            style = HIGHLIGHT_STYLE
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(
             placement, entry.get_standings_direction().value
