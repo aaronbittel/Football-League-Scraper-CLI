@@ -21,7 +21,7 @@ class TeamRequestParams:
 
 
 def handle_team_request(args: Namespace) -> None:
-    team: str = args.team_name[0]
+    team: str = args.team_name[0].capitalize()
 
     league = get_league(args.league)
 

@@ -1,6 +1,6 @@
 """Parsing the users input."""
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, _SubParsersAction
 
 from bundesliga_scraper.request_handler.fixture_request_handler import (
     handle_fixture_request,
@@ -60,7 +60,7 @@ def parse_user_args(parser: ArgumentParser) -> None:
         parser.print_help()
 
 
-def create_team_subcommand_parser(subparsers):
+def create_team_subcommand_parser(subparsers: _SubParsersAction) -> None:
     team_parser = subparsers.add_parser(
         "team", help="Get Table and Fixture information specific about a team."
     )
@@ -101,7 +101,7 @@ def create_team_subcommand_parser(subparsers):
     team_parser.set_defaults(func=handle_team_request)
 
 
-def create_fixture_subcommand_parser(subparsers):
+def create_fixture_subcommand_parser(subparsers: _SubParsersAction) -> None:
     fixture_parser = subparsers.add_parser(
         "fixture", help="Get Fixture information about the specified league."
     )
@@ -144,7 +144,7 @@ def create_fixture_subcommand_parser(subparsers):
     fixture_parser.set_defaults(func=handle_fixture_request)
 
 
-def create_table_subcommand_parser(subparsers):
+def create_table_subcommand_parser(subparsers: _SubParsersAction) -> None:
     table_parser = subparsers.add_parser(
         "table", help="Get Table information about the specified league."
     )

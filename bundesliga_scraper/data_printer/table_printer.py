@@ -58,7 +58,9 @@ def add_rows(
         style = ""
         if place is not None and not (place - 2 <= placement <= place + 3):
             continue
-        if any(highlight in entry.team_name for highlight in highlights):
+        if any(
+            highlight.lower() in entry.team_name.lower() for highlight in highlights
+        ):
             style = HIGHLIGHT_STYLE
         goal_diff = determine_goal_diff_color(entry.goal_diff)
         placement = determine_placement_string(
