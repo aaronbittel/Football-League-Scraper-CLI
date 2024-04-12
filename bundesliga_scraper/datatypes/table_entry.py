@@ -72,7 +72,9 @@ class TableEntry:
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals
 
-    def update_away_team(self, fixture: FixtureEntry, match_result: MatchResult):
+    def update_away_team(
+        self, fixture: FixtureEntry, match_result: MatchResult
+    ) -> None:
         self.goals += fixture.away_goals
         self.opponent_goals += fixture.home_goals
         if match_result == MatchResult.HOME_WON:
@@ -82,7 +84,9 @@ class TableEntry:
         else:
             self._update_after_draw(fixture.match_is_live)
 
-    def update_home_team(self, fixture: FixtureEntry, match_result: MatchResult):
+    def update_home_team(
+        self, fixture: FixtureEntry, match_result: MatchResult
+    ) -> None:
         self.goals += fixture.home_goals
         self.opponent_goals += fixture.away_goals
         if match_result == MatchResult.HOME_WON:
@@ -125,3 +129,8 @@ class TableEntry:
 
     def __eq__(self, other: TableEntry) -> bool:
         return self.points == other.points and self.goal_diff == other.goal_diff
+
+    def __str__(self) -> str:
+        return (
+            f"{self.team_name:<30}{self.matches:<5}{self.goal_diff:^5}{self.points:>5}"
+        )
