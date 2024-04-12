@@ -31,7 +31,11 @@ def get_fixture_string(fixture: FixtureEntry, highlights: list[str]) -> str:
     else:
         match_string = f"{fixture.home_team.rjust(FUTURE_GAME_SPACE)}{FUTURE_MATCH_SEPERATOR}{fixture.away_team.ljust(FUTURE_GAME_SPACE)}"
 
-    if fixture.home_team in highlights or fixture.away_team in highlights:
+    if any(
+        highlight.lower() in fixture.home_team.lower()
+        or highlight.lower() in fixture.away_team.lower()
+        for highlight in highlights
+    ):
         return f"{HIGHLIGHT_STYLE}{match_string}{HIGHLIGHT_STYLE_END}"
 
     return match_string
