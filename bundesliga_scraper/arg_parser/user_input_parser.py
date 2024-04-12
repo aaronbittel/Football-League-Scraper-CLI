@@ -30,13 +30,13 @@ def create_parser() -> ArgumentParser:
         help="Choose the league you want the information for.",
     )
 
-    parser.add_argument(
-        "-s",
-        "--start-session",
-        dest="session",
-        action="store_true",
-        help="Starts a session for the given league -> league is now default",
-    )
+    # parser.add_argument(
+    #     "-s",
+    #     "--start-session",
+    #     dest="session",
+    #     action="store_true",
+    #     help="Starts a session for the given league -> league is now default",
+    # )
 
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command-help")
 
@@ -54,11 +54,16 @@ def parse_user_args(parser: ArgumentParser) -> None:
         parser (argparse.ArgumentParser): parser
     """
     args = parser.parse_args()
-    args.func(args)
+    if args.subcommand:
+        args.func(args)
+    else:
+        parser.print_help()
 
 
 def create_team_subcommand_parser(subparsers):
-    team_parser = subparsers.add_parser("team", help="team help")
+    team_parser = subparsers.add_parser(
+        "team", help="Get Table and Fixture information specific about a team."
+    )
     team_parser.add_argument(
         "team_name",
         nargs=1,
@@ -97,7 +102,9 @@ def create_team_subcommand_parser(subparsers):
 
 
 def create_fixture_subcommand_parser(subparsers):
-    fixture_parser = subparsers.add_parser("fixture", help="fixture help")
+    fixture_parser = subparsers.add_parser(
+        "fixture", help="Get Fixture information about the specified league."
+    )
     fixture_parser.add_argument(
         "matchday",
         nargs="?",
@@ -138,7 +145,9 @@ def create_fixture_subcommand_parser(subparsers):
 
 
 def create_table_subcommand_parser(subparsers):
-    table_parser = subparsers.add_parser("table", help="table help")
+    table_parser = subparsers.add_parser(
+        "table", help="Get Table information about the specified league."
+    )
     table_parser.add_argument(
         "matchday",
         nargs="?",
