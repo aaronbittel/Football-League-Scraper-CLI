@@ -30,24 +30,13 @@ get = "bundesliga_scraper.__main__:main"
 line-length = 88
 indent-width = 4
 
-# [tool.ruff.lint]
-# select = [
-#     "F", #Pyflakes
-#     "B", #flake8-bugbear
-#     "A", #flake8-builtins
-#     "C4", #flake8-comprehensions
-#     "I", #isort
-#     "PT", #flake8-pytest-style
-#     "C90", #mccabe
-#     "N", #pep8-naming
-#     "E", #pycodestyle error
-#     "PL", #Pylint
-#     "D", #pydocstyle
-#     "UP", #pyupgrade
-#     "ANN", #flake8-annotations
-#     "ERA", #eradicate
-# ]
-# select = ["ALL"]
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F", "PL", "ANN"]
+ignore = []
+
 # ignore = ["D203", "D213", "D406", "D407", "D413", "ANN101", "COM812", "ISC001", "T201"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
