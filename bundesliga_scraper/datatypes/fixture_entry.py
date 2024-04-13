@@ -83,7 +83,7 @@ class FixtureEntry:
             return MatchResult.AWAY_WON
         return MatchResult.DRAW
 
-    def is_in_future(self):
+    def match_is_in_future(self) -> bool:
         return not self.match_is_finished and not self.match_is_live
 
     def get_home_team(self) -> str:

@@ -5,53 +5,29 @@ from __future__ import annotations
 from argparse import Namespace
 from dataclasses import dataclass
 
+from bundesliga_scraper.datatypes.table_entry import TableEntry
+import bundesliga_scraper.request_handler.handler as h
 from bundesliga_scraper.api import api
 from bundesliga_scraper.data_printer import table_printer
 from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
 from bundesliga_scraper.datatypes.matchday import Matchday
 from bundesliga_scraper.datatypes.table import Table
-from bundesliga_scraper.request_handler.utils import FIRST_ROUND_MATCHDAY, get_league
+from bundesliga_scraper.table.calculator import calculate
+from bundesliga_scraper.table.parser import MatchdaySelector
 
 
-@dataclass(frozen=True)
-class MatchdaySelector:
-    to: int
-    from_: int = 1
-    include_postponed_matches: bool = True
-    home: bool = True
-    away: bool = True
-
-
-@dataclass(frozen=True)
-class TableRequestJob:
-    title: str
-    matchday_selctor: MatchdaySelector
-
-
-def handle_table_request(args: Namespace) -> None:
+def table_request_handler(matchday_selector: MatchdaySelector) -> None:
     """Handles the table request.
 
     Args:
         args (Namespace): user arguments
     """
-
-    league = get_league(args.league)
-
-    season_matchdays = api.retrieve_all_matchdays(league)
-    current_matchday = api.retrieve_current_matchday(league)
-    empty_table: Table = api.initialize_league_table(league=league)
-
-    active_matchday = get_active_matchday(season_matchdays[current_matchday - 1])
-    table_request_job_queue = create_job_queue(args, active_matchday)
-
-    for job in table_request_job_queue:
-        handle_job(
-            league=league,
-            empty_table=empty_table,
-            season_matchdays=season_matchdays,
-            job=job,
-            highlights=args.highlights,
-        )
+    league = matchday_selector.league
+    all_matchdays = h.cache[league]["all_matchdays"]
+    standings = calculate(
+        matchdays=all_matchdays[matchday_selector.from_ - 1 : matchday_selector.to],
+        matchday_selector=matchday_selector,
+    )
 
 
 def handle_job(
@@ -60,7 +36,7 @@ def handle_job(
     season_matchdays: list[Matchday],
     job: TableRequestJob,
     highlights: list[str],
-):
+) -> None:
     title, selector = job.title, job.matchday_selctor
     table = empty_table.copy()
 
@@ -110,13 +86,6 @@ def create_job_queue(args: Namespace, active_matchday: int) -> list[TableRequest
     return table_request_job_queue
 
 
-def get_active_matchday(current_matchday: Matchday) -> int:
-    for fixture in current_matchday.fixtures:
-        if fixture.match_is_finished or fixture.match_is_live:
-            return current_matchday.matchday
-    return current_matchday.matchday - 1
-
-
 def create_matchday_job(matchday: int, active_matchday: int) -> TableRequestJob:
     selector = get_matchday_selector(matchday, active_matchday)
     title = f"Table Matchday {selector.to}"
@@ -158,44 +127,3 @@ def create_first_round_job(active_matchday: int) -> TableRequestJob:
     first_round_selector = get_first_round_selector(active_matchday)
     title = "First Round Table"
     return TableRequestJob(title, first_round_selector)
-
-
-def get_home_selector(active_matchday: int) -> MatchdaySelector:
-    return MatchdaySelector(to=active_matchday, away=False)
-
-
-def get_away_selector(active_matchday: int) -> MatchdaySelector:
-    return MatchdaySelector(to=active_matchday, home=False)
-
-
-def get_matchday_selector(matchday: int, active_matchday: int) -> MatchdaySelector:
-    matchday = min(active_matchday, max(1, matchday))
-    return MatchdaySelector(to=matchday, include_postponed_matches=False)
-
-
-def get_last_selector(n: int, active_matchday: int) -> MatchdaySelector:
-    matchday = active_matchday - n + 1
-    if matchday < 1:
-        matchday = 1
-    return MatchdaySelector(from_=matchday, to=active_matchday)
-
-
-def get_since_selector(since: int, active_matchday: int) -> MatchdaySelector:
-    if since > active_matchday:
-        since = active_matchday
-
-    return MatchdaySelector(from_=since, to=active_matchday)
-
-
-def get_first_round_selector(active_matchday: int) -> MatchdaySelector:
-    matchday = min(FIRST_ROUND_MATCHDAY, active_matchday)
-    return MatchdaySelector(to=matchday)
-
-
-def get_second_round_selector(active_matchday: int) -> MatchdaySelector:
-    if active_matchday <= FIRST_ROUND_MATCHDAY:
-        # TODO Implement a 0-Table
-        raise ValueError(
-            f"No second half table available. Its only matchday {active_matchday}"
-        )
-    return MatchdaySelector(from_=FIRST_ROUND_MATCHDAY + 1, to=active_matchday)

@@ -49,7 +49,7 @@ class TableEntry:
             goal_diff=int(data["goalDiff"]),
         )
 
-    def get_standings_direction(self):
+    def get_standings_direction(self) -> StandingsDirection:
         if (
             len(self.history.placements) < 2
             or self.history.placements[-1] == self.history.placements[-2]
@@ -72,7 +72,9 @@ class TableEntry:
         self.matches += 1
         self.goal_diff = self.goals - self.opponent_goals
 
-    def update_away_team(self, fixture: FixtureEntry, match_result: MatchResult):
+    def update_away_team(
+        self, fixture: FixtureEntry, match_result: MatchResult
+    ) -> None:
         self.goals += fixture.away_goals
         self.opponent_goals += fixture.home_goals
         if match_result == MatchResult.HOME_WON:
@@ -82,7 +84,9 @@ class TableEntry:
         else:
             self._update_after_draw(fixture.match_is_live)
 
-    def update_home_team(self, fixture: FixtureEntry, match_result: MatchResult):
+    def update_home_team(
+        self, fixture: FixtureEntry, match_result: MatchResult
+    ) -> None:
         self.goals += fixture.home_goals
         self.opponent_goals += fixture.away_goals
         if match_result == MatchResult.HOME_WON:
@@ -91,6 +95,9 @@ class TableEntry:
             self._update_after_lose(fixture.match_is_live)
         else:
             self._update_after_draw(fixture.match_is_live)
+
+    def get_last_5(self) -> list[str]:
+        return "".join(self.history.matches[:-6:-1])
 
     def _update_after_draw(self, is_live: bool) -> None:
         self.points += 1
@@ -125,3 +132,6 @@ class TableEntry:
 
     def __eq__(self, other: TableEntry) -> bool:
         return self.points == other.points and self.goal_diff == other.goal_diff
+
+    def __str__(self) -> str:
+        return f"{self.team_name:<27}{self.matches:<5}{self.goal_diff:^5}{self.points:^5}{self.get_last_5():>}"

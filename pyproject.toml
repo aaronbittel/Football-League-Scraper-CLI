@@ -17,7 +17,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "ruff"
+  "ruff",
+  "IPython"
 ]
 
 [project.scripts]
@@ -35,7 +36,7 @@ indent-width = 4
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
 select = ["E4", "E7", "E9", "F", "PL", "ANN"]
-ignore = []
+ignore = ["ANN101", "ANN102"]
 
 # ignore = ["D203", "D213", "D406", "D407", "D413", "ANN101", "COM812", "ISC001", "T201"]
 

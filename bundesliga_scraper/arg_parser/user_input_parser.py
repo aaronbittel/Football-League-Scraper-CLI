@@ -5,8 +5,9 @@ from argparse import ArgumentParser, _SubParsersAction
 from bundesliga_scraper.request_handler.fixture_request_handler import (
     handle_fixture_request,
 )
+from bundesliga_scraper.request_handler.handler import handler
 from bundesliga_scraper.request_handler.table_request_handler import (
-    handle_table_request,
+    table_request_handler,
 )
 from bundesliga_scraper.request_handler.team_request_handler import handle_team_request
 
@@ -55,7 +56,7 @@ def parse_user_args(parser: ArgumentParser) -> None:
     """
     args = parser.parse_args()
     if args.subcommand:
-        args.func(args)
+        handler(args)
     else:
         parser.print_help()
 
@@ -211,4 +212,4 @@ def create_table_subcommand_parser(subparsers: _SubParsersAction) -> None:
         help="Give a list of teams that will be highlighted in the output.",
     )
 
-    table_parser.set_defaults(func=handle_table_request)
+    table_parser.set_defaults(func=table_request_handler)
