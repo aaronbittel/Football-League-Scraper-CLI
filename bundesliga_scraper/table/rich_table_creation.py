@@ -1,17 +1,17 @@
-from bundesliga_scraper.datatypes.table_entry import TableEntry
-from bundesliga_scraper.table.parser import TableRequestJob
 from rich import table as t, box, style
+
+from bundesliga_scraper.datatypes.table_job_creation import TableCreationJob
+
 
 HEADER_STYLE = style.Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": style.Style(bold=False)}
 HIGHLIGHT_STYLE = "white on orange3"
 
 
-def create_table(table_request_job: TableRequestJob) -> t.Table:
+def create_table(table_creation_job: TableCreationJob) -> t.Table:
     table = t.Table(
-        title=table_request_job.title,
+        title=table_creation_job.title,
         box=box.ROUNDED,
-        # show_lines=True,
     )
 
     table.add_column("#", style="bold", header_style=HEADER_STYLE)
@@ -30,15 +30,20 @@ def create_table(table_request_job: TableRequestJob) -> t.Table:
     )
     table.add_column("Last 5", **DEFAULT_COLUMN_SETTINGS)
 
-    add_rows(table, table_request_job.standings, table_request_job.highlights)
+    add_rows(table, table_creation_job)
     return table
 
 
-def add_rows(
-    table: t.Table, standings: list[TableEntry], highlights: list[str]
-) -> None:
+def add_rows(table: t.Table, table_creation_job: TableCreationJob) -> None:
+    standings = table_creation_job.standings
+    focus = table_creation_job.focus
+    highlights = table_creation_job.highlights if focus is None else []
     for placement, team in enumerate(standings, start=1):
         style = ""
+        if focus is not None and not (focus - 2 <= placement <= focus + 3):
+            continue
+        if focus == placement:
+            style = HIGHLIGHT_STYLE
         if any(highlight.lower() in team.team_name.lower() for highlight in highlights):
             style = HIGHLIGHT_STYLE
 
