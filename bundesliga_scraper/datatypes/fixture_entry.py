@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-
 from bundesliga_scraper.datatypes.constants import League, MatchResult
 
 
@@ -45,12 +44,11 @@ class FixtureEntry:
             hours=1
         ):
             match_is_live = True
-            home_goals, away_goals = 0, 0
-            for goal in goals:
-                if goal["scoreTeam1"] == 0:
-                    away_goals += 1
-                else:
-                    home_goals += 1
+            if data["goals"]:
+                home_goals = data["goals"][-1]["scoreTeam1"]
+                away_goals = data["goals"][-1]["scoreTeam2"]
+            else:
+                home_goals, away_goals = 0, 0
         else:
             home_goals, away_goals = 0, 0
 
