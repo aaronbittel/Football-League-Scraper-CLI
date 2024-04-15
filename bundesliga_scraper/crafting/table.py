@@ -3,8 +3,8 @@ from itertools import batched
 from bundesliga_scraper.api import api
 from bundesliga_scraper.crafting.graph_testings import print_points
 from bundesliga_scraper.datatypes.constants import League
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry, Matchday
-from bundesliga_scraper.datatypes.table_entry import Table, TableEntry
+from bundesliga_scraper.fixture.fixture_entry import FixtureEntry, Matchday
+from bundesliga_scraper.table.table_entry import Table, TableEntry
 
 table: Table = api.initialize_league_table(League.Bundesliga)
 all_fixtures: list[FixtureEntry] = api.retrieve_all_matchdays(League.Bundesliga)

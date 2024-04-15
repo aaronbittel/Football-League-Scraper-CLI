@@ -1,12 +1,10 @@
 from argparse import Namespace
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Generator
 
 
-from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES, League
-from bundesliga_scraper.datatypes.table_entry import TableEntry
-import bundesliga_scraper.request_handler.handler as h
-from bundesliga_scraper.request_handler.utils import get_league
+from bundesliga_scraper.datatypes.constants import LEAGUE_NAMES
+from bundesliga_scraper.datatypes import utils
 
 
 FIRST_ROUND_MATCHDAY = 17
@@ -23,11 +21,10 @@ class MatchdaySelector:
 
 # yields MatchdaySelector objects and doesn't accept any input parameters or send any values back
 def parse(
-    args: Namespace,
+    args: Namespace, active_matchday: int
 ) -> Generator[tuple[str, MatchdaySelector], None, None]:
-    league = get_league(args.league)
+    league = utils.get_league(args.league)
     league_name = LEAGUE_NAMES[league]
-    active_matchday = h.cache[league]["active_matchday"]
 
     if args.first_round:
         title = f"{league_name} First Round Table"

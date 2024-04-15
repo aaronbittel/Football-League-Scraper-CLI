@@ -9,7 +9,7 @@ from rich.align import Align
 from rich.rule import Rule
 from rich.table import Table
 
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from bundesliga_scraper.fixture.fixture_entry import FixtureEntry
 
 fixture_entries: list[FixtureEntry] = []
 with open(

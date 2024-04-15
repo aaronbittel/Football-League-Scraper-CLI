@@ -1,11 +1,10 @@
 """Creating colorful strings of matchday fixture information."""
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
+from typing import Generator
+from rich import panel
+from bundesliga_scraper.datatypes.fixture import fixture_utils
 
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
-from bundesliga_scraper.datatypes.matchday import Matchday
+from bundesliga_scraper.datatypes.fixture import fixture_entry
 
 WINNING_STYLE = "[bold pale_green3]"
 WINNING_STYLE_END = f"[/{WINNING_STYLE[1:]}"
@@ -23,7 +22,9 @@ NAME_SPACE = (WIDTH - len(MATCH_SEPERATOR)) // 2
 FUTURE_GAME_SPACE = (WIDTH - len(FUTURE_MATCH_SEPERATOR)) // 2
 
 
-def get_fixture_string(fixture: FixtureEntry, highlights: list[str]) -> str:
+def get_fixture_string(
+    fixture: fixture_entry.FixtureEntry, highlights: list[str]
+) -> str:
     if fixture.match_is_finished or fixture.match_is_live:
         home_string = get_home_team_styled_string(fixture)
         away_string = get_away_team_styled_string(fixture)
@@ -41,29 +42,24 @@ def get_fixture_string(fixture: FixtureEntry, highlights: list[str]) -> str:
     return match_string
 
 
-def print_fixture_entries(
-    title: str, matchday: Matchday, highlights: list[str]
-) -> None:
-    console = Console()
-    matchday_weekdays_split = matchday.split_fixture_into_weekdays()
-
-    print_title(console, title)
+def create_fixture_panels(
+    fixtures: list[fixture_entry.FixtureEntry], highlights: list[str]
+) -> Generator[panel.Panel, None, None]:
+    matchday_weekdays_split = fixture_utils.split_fixture_into_weekdays(fixtures)
 
     for weekday_date, kickoff_times in matchday_weekdays_split.items():
         panel_content = get_panel_content(highlights, kickoff_times)
 
-        console.print(
-            Panel(
-                renderable=panel_content,
-                title=weekday_date.strftime(r"%d.%m.%Y, %A"),
-                width=WIDTH,
-                padding=1,
-            )
+        yield panel.Panel(
+            renderable=panel_content,
+            title=weekday_date.strftime(r"%d.%m.%Y, %A"),
+            width=WIDTH,
+            padding=1,
         )
 
 
 def get_panel_content(
-    highlights: list[str], kickoff_times: dict[str, list[FixtureEntry]]
+    highlights: list[str], kickoff_times: dict[str, list[fixture_entry.FixtureEntry]]
 ) -> str:
     panel_content = ""
     for kickoff_time, fixtures in kickoff_times.items():
@@ -78,20 +74,15 @@ def get_panel_content(
     return panel_content
 
 
-def print_title(console: Console, title: str) -> None:
-    leftspace = (WIDTH - len(title)) // 2
-    console.print(Text(leftspace * " ") + Text(f"{title}\n", style="bold italic"))
-
-
-def get_home_string(fixture: FixtureEntry) -> str:
+def get_home_string(fixture: fixture_entry.FixtureEntry) -> str:
     return f"{fixture.home_team} {fixture.home_goals}"
 
 
-def get_away_string(fixture: FixtureEntry) -> str:
+def get_away_string(fixture: fixture_entry.FixtureEntry) -> str:
     return f"{fixture.away_goals} {fixture.away_team}"
 
 
-def get_home_team_styled_string(fixture: FixtureEntry) -> str:
+def get_home_team_styled_string(fixture: fixture_entry.FixtureEntry) -> str:
     home_string = f"{get_home_string(fixture).rjust(NAME_SPACE)}"
     if fixture.home_team_won():
         return f"{WINNING_STYLE}{home_string}{WINNING_STYLE_END}"
@@ -99,7 +90,7 @@ def get_home_team_styled_string(fixture: FixtureEntry) -> str:
         return home_string
 
 
-def get_away_team_styled_string(fixture: FixtureEntry) -> str:
+def get_away_team_styled_string(fixture: fixture_entry.FixtureEntry) -> str:
     away_string = f"{get_away_string(fixture).ljust(NAME_SPACE)}"
     if fixture.away_team_won():
         return f"{WINNING_STYLE}{away_string}{WINNING_STYLE_END}"

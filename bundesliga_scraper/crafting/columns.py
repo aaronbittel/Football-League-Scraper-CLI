@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from bundesliga_scraper.datatypes.fixture.fixture_entry import FixtureEntry
 
 
 def create_table():

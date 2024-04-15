@@ -2,14 +2,13 @@
 
 from argparse import ArgumentParser, _SubParsersAction
 
-from bundesliga_scraper.request_handler.fixture_request_handler import (
+from bundesliga_scraper.datatypes.fixture.fixture_request_handler import (
     handle_fixture_request,
 )
-from bundesliga_scraper.request_handler.handler import handler
-from bundesliga_scraper.request_handler.table_request_handler import (
+from bundesliga_scraper.datatypes.table.table_request_handler import (
     table_request_handler,
 )
-from bundesliga_scraper.request_handler.team_request_handler import handle_team_request
+from bundesliga_scraper.datatypes.team.team_request_handler import handle_team_request
 
 
 def create_parser() -> ArgumentParser:
@@ -56,7 +55,7 @@ def parse_user_args(parser: ArgumentParser) -> None:
     """
     args = parser.parse_args()
     if args.subcommand:
-        handler(args)
+        args.func(args)
     else:
         parser.print_help()
 

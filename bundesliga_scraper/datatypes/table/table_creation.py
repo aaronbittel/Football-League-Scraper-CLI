@@ -1,15 +1,22 @@
-from rich import table as t, box, style
-
-from bundesliga_scraper.datatypes.table_job_creation import TableCreationJob
-
+from dataclasses import dataclass, field
+from rich import style, box, table as rich_table
+from bundesliga_scraper.datatypes.table import table_entry
 
 HEADER_STYLE = style.Style(bold=False)
 DEFAULT_COLUMN_SETTINGS = {"justify": "center", "header_style": style.Style(bold=False)}
 HIGHLIGHT_STYLE = "white on orange3"
 
 
-def create_table(table_creation_job: TableCreationJob) -> t.Table:
-    table = t.Table(
+@dataclass(frozen=True)
+class TableCreationJob:
+    title: str
+    standings: list[table_entry.TableEntry] = field(default_factory=list)
+    highlights: list[str] = None
+    focus: int = None
+
+
+def create_table(table_creation_job: TableCreationJob) -> rich_table.Table:
+    table = rich_table.Table(
         title=table_creation_job.title,
         box=box.ROUNDED,
     )
@@ -34,17 +41,19 @@ def create_table(table_creation_job: TableCreationJob) -> t.Table:
     return table
 
 
-def add_rows(table: t.Table, table_creation_job: TableCreationJob) -> None:
+def add_rows(table: rich_table.Table, table_creation_job: TableCreationJob) -> None:
     standings = table_creation_job.standings
     focus = table_creation_job.focus
-    highlights = table_creation_job.highlights if focus is None else []
+    highlights = table_creation_job.highlights
     for placement, team in enumerate(standings, start=1):
         style = ""
         if focus is not None and not (focus - 2 <= placement <= focus + 3):
             continue
         if focus == placement:
             style = HIGHLIGHT_STYLE
-        if any(highlight.lower() in team.team_name.lower() for highlight in highlights):
+        if highlights and any(
+            highlight.lower() in team.team_name.lower() for highlight in highlights
+        ):
             style = HIGHLIGHT_STYLE
 
         goal_diff_str = determine_goal_diff_color(team.goal_diff)

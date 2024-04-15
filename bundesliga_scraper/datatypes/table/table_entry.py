@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from bundesliga_scraper.datatypes.constants import MatchResult, ResultSymbol
-from bundesliga_scraper.datatypes.fixture_entry import FixtureEntry
+from bundesliga_scraper.datatypes.fixture import fixture_entry
 
 
 class StandingsDirection(StrEnum):
@@ -61,7 +61,7 @@ class TableEntry:
             else StandingsDirection.UP
         )
 
-    def update(self, fixture: FixtureEntry) -> None:
+    def update(self, fixture: fixture_entry.FixtureEntry) -> None:
         match_result: MatchResult = fixture.get_result()
 
         if self.team_name == fixture.get_home_team():
@@ -73,7 +73,7 @@ class TableEntry:
         self.goal_diff = self.goals - self.opponent_goals
 
     def update_away_team(
-        self, fixture: FixtureEntry, match_result: MatchResult
+        self, fixture: fixture_entry.FixtureEntry, match_result: MatchResult
     ) -> None:
         self.goals += fixture.away_goals
         self.opponent_goals += fixture.home_goals
@@ -85,7 +85,7 @@ class TableEntry:
             self._update_after_draw(fixture.match_is_live)
 
     def update_home_team(
-        self, fixture: FixtureEntry, match_result: MatchResult
+        self, fixture: fixture_entry.FixtureEntry, match_result: MatchResult
     ) -> None:
         self.goals += fixture.home_goals
         self.opponent_goals += fixture.away_goals
