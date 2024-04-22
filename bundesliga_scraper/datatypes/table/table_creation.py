@@ -15,15 +15,21 @@ class TableCreationJob:
     focus: int = None
 
 
-def create_table(table_creation_job: TableCreationJob) -> rich_table.Table:
+def create_table(
+    title: str,
+    standings: list[table_entry.TableEntry],
+    highlights: list[str],
+    focus: int = None,
+) -> rich_table.Table:
     table = rich_table.Table(
-        title=table_creation_job.title,
+        title=title,
         box=box.ROUNDED,
     )
 
     table.add_column("#", style="bold", header_style=HEADER_STYLE)
     table.add_column("Team", header_style=HEADER_STYLE)
     table.add_column("Matches", **DEFAULT_COLUMN_SETTINGS)
+    # table.add_column("M", **DEFAULT_COLUMN_SETTINGS)
     table.add_column("W", **DEFAULT_COLUMN_SETTINGS)
     table.add_column("D", **DEFAULT_COLUMN_SETTINGS)
     table.add_column("L", **DEFAULT_COLUMN_SETTINGS)
@@ -35,16 +41,25 @@ def create_table(table_creation_job: TableCreationJob) -> rich_table.Table:
         header_style=HEADER_STYLE,
         style=style.Style(bold=True),
     )
+    # table.add_column(
+    #     "P",
+    #     justify="center",
+    #     header_style=HEADER_STYLE,
+    #     style=style.Style(bold=True),
+    # )
     table.add_column("Last 5", **DEFAULT_COLUMN_SETTINGS)
 
-    add_rows(table, table_creation_job)
+    add_rows(table, standings, highlights, focus)
     return table
 
 
-def add_rows(table: rich_table.Table, table_creation_job: TableCreationJob) -> None:
-    standings = table_creation_job.standings
-    focus = table_creation_job.focus
-    highlights = table_creation_job.highlights
+def add_rows(
+    table: rich_table.Table,
+    standings: list[table_entry.TableEntry],
+    highlights: list[str],
+    focus: int = None,
+) -> None:
+    highlights = [] if highlights is None else highlights
     for placement, team in enumerate(standings, start=1):
         style = ""
         if focus is not None and not (focus - 2 <= placement <= focus + 3):

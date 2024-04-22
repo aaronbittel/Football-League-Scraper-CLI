@@ -6,7 +6,7 @@ from rich.table import Table
 from bundesliga_scraper.datatypes.fixture.fixture_entry import FixtureEntry
 
 
-def create_table():
+def create_table() -> Table:
     table = Table(
         title="Star Wars Movies",
         pad_edge=False,

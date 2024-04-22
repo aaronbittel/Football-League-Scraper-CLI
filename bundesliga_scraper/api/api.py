@@ -27,7 +27,7 @@ def retrieve_table(league: League, season: int = 2023) -> list[table_entry.Table
 
 def retrieve_all_matchdays(
     league: League, season: int = 2023
-) -> dict[int, list[FixtureEntry]]:
+) -> list[list[FixtureEntry]]:
     all_fixtures_list = get_match_data(league=league, season=season)
 
     all_fixtures = [
@@ -101,7 +101,7 @@ def build_get_matchday_fixtures(
 
 
 def _extract_season_matchdays(
-    all_fixtures: list[FixtureEntry],
+    all_fixtures: list[list[FixtureEntry]],
 ) -> list[list[FixtureEntry]]:
     season_matchdays: list[list[FixtureEntry]] = []
     for i in range(1, 35):

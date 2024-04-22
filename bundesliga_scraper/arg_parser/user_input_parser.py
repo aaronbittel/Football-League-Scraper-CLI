@@ -1,6 +1,6 @@
 """Parsing the users input."""
 
-from argparse import ArgumentParser, _SubParsersAction
+import argparse
 
 from bundesliga_scraper.datatypes.fixture.fixture_request_handler import (
     handle_fixture_request,
@@ -10,14 +10,19 @@ from bundesliga_scraper.datatypes.table.table_request_handler import (
 )
 from bundesliga_scraper.datatypes.team.team_request_handler import handle_team_request
 
+from bundesliga_scraper.datatypes import utils
+from bundesliga_scraper.datatypes.league import league
+from bundesliga_scraper.datatypes.table import table_parser, table_creation
+from rich import console as con
 
-def create_parser() -> ArgumentParser:
+
+def create_parser() -> argparse.ArgumentParser:
     """Creating the parser object and adding its arguments.
 
     Returns:
         argparse.ArgumentParser: parser
     """
-    parser = ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog="Bundesliga Scraper",
         description="Scraping the Bundesliga",
         epilog="Welcome!",
@@ -47,20 +52,26 @@ def create_parser() -> ArgumentParser:
     return parser
 
 
-def parse_user_args(parser: ArgumentParser) -> None:
+def parse_user_args(parser: argparse.ArgumentParser) -> None:
     """Parsing the arguments given by the user.
 
     Args:
         parser (argparse.ArgumentParser): parser
     """
     args = parser.parse_args()
-    if args.subcommand:
-        args.func(args)
-    else:
-        parser.print_help()
+    requested_league = utils.get_league(args.league)
+    football_league = league.League(requested_league)
+    console = con.Console()
+    if args.subcommand == "table":
+        for title, matchday_selector in table_parser.parse(
+            args, football_league.active_matchday
+        ):
+            standings = football_league.calculate_table(matchday_selector)
+            table = table_creation.create_table(title, standings, args.highlights)
+            console.print(table, justify="center")
 
 
-def create_team_subcommand_parser(subparsers: _SubParsersAction) -> None:
+def create_team_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     team_parser = subparsers.add_parser(
         "team", help="Get Table and Fixture information specific about a team."
     )
@@ -101,7 +112,7 @@ def create_team_subcommand_parser(subparsers: _SubParsersAction) -> None:
     team_parser.set_defaults(func=handle_team_request)
 
 
-def create_fixture_subcommand_parser(subparsers: _SubParsersAction) -> None:
+def create_fixture_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     fixture_parser = subparsers.add_parser(
         "fixture", help="Get Fixture information about the specified league."
     )
@@ -144,7 +155,7 @@ def create_fixture_subcommand_parser(subparsers: _SubParsersAction) -> None:
     fixture_parser.set_defaults(func=handle_fixture_request)
 
 
-def create_table_subcommand_parser(subparsers: _SubParsersAction) -> None:
+def create_table_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     table_parser = subparsers.add_parser(
         "table", help="Get Table information about the specified league."
     )
