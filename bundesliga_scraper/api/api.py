@@ -13,23 +13,23 @@ from bundesliga_scraper.datatypes.table_entry import TableEntry
 BASE_URL = "https://api.openligadb.de"
 
 
-def get_table(league: League, season: int = 2023) -> dict:
+def get_table(league: League, season: int = 2024) -> dict:
     """Fetches the Football table data for a particular league and a season."""
     url = build_get_table_url(league, season)
     response = requests.get(url, timeout=3)
     return response.json()
 
 
-def build_get_table_url(league: League, season: int = 2023) -> str:
+def build_get_table_url(league: League, season: int = 2024) -> str:
     return f"{BASE_URL}/getbltable/{league}/{season}"
 
 
-def retrieve_table(league: League, season: int = 2023) -> list[TableEntry]:
+def retrieve_table(league: League, season: int = 2024) -> list[TableEntry]:
     data = get_table(league=league, season=season)
     return [TableEntry.from_dict(table_entry) for table_entry in data]
 
 
-def retrieve_all_matchdays(league: League, season: int = 2023) -> list[Matchday]:
+def retrieve_all_matchdays(league: League, season: int = 2024) -> list[Matchday]:
     all_fixtures_list = get_match_data(league=league, season=season)
 
     all_fixtures = [
@@ -39,7 +39,7 @@ def retrieve_all_matchdays(league: League, season: int = 2023) -> list[Matchday]
     return _extract_season_matchdays(all_fixtures)
 
 
-def get_match_data(league: League, season: int = 2023, team_filter: str = "") -> dict:
+def get_match_data(league: League, season: int = 2024, team_filter: str = "") -> dict:
     url = build_get_match_data_url(
         league=league, season=season, team_filter=team_filter
     )
@@ -48,13 +48,13 @@ def get_match_data(league: League, season: int = 2023, team_filter: str = "") ->
 
 
 def build_get_match_data_url(
-    league: League, season: int = 2023, team_filter: str = ""
+    league: League, season: int = 2024, team_filter: str = ""
 ) -> str:
     return f"{BASE_URL}/getmatchdata/{league}/{season}/{team_filter}"
 
 
 def retrieve_team_match_data(
-    league: League, team: str, season: int = 2023
+    league: League, team: str, season: int = 2024
 ) -> list[FixtureEntry]:
     team_data = get_match_data(league=league, team_filter=team, season=season)
     return [FixtureEntry.from_dict(fixture) for fixture in team_data]
@@ -71,17 +71,17 @@ def build_get_current_matchday_url(league: League) -> str:
     return f"{BASE_URL}/getcurrentgroup/{league}"
 
 
-def build_get_available_teams_url(league: League, season: int = 2023) -> str:
+def build_get_available_teams_url(league: League, season: int = 2024) -> str:
     return f"{BASE_URL}/getavailableteams/{league}/{season}"
 
 
-def get_available_teams(league: League, season: int = 2023) -> dict:
+def get_available_teams(league: League, season: int = 2024) -> dict:
     url = build_get_available_teams_url(league=league, season=season)
     response = requests.get(url, timeout=3)
     return response.json()
 
 
-def initialize_league_table(league: League, season: int = 2023) -> Table:
+def initialize_league_table(league: League, season: int = 2024) -> Table:
     data = get_available_teams(league=league, season=season)
     teams_dict: dict[str, TableEntry] = {
         entry["teamName"]: TableEntry(entry["teamName"]) for entry in data
