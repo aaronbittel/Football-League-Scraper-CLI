@@ -7,18 +7,19 @@ name = "Bundesliga-Scraper"
 version = "0.0.1"
 requires-python = ">=3.11"
 authors = [
-  {name = "Aaron Bittel"},
+    {name = "Aaron Bittel", email = "aaron@bittels.de"},
 ]
 dependencies = [
-  "argparse",
-  "requests",
-  "rich",
-  "plotext",
+    "argparse",
+    "requests",
+    "rich",
+    "plotext",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "ruff"
+    "ruff",
+    "mypy"
 ]
 
 [project.scripts]

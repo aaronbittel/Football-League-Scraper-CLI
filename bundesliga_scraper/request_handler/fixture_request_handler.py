@@ -61,7 +61,8 @@ def get_selected_matchday_games(
 
 def get_matchday(params: MatchdaySelectionParams) -> int:
     # user did not provide a matchday -> get current
-    if params.user_matchday is None:
+    matchday = 0
+    if not params.user_matchday:
         effective_count = params.nxt - params.prev
         matchday = params.current_matchday + effective_count
     return min(MAX_MATCHDAY, max(1, matchday))
